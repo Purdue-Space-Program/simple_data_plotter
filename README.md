@@ -1,6 +1,6 @@
 # data-plotter
 
-Tool for quick CSV -> multi-axis Plotly visualization.
+Convert large sensor CSVs into Parquet and plot them with Plotly.
 
 ### usage
 
