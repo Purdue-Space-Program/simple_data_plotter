@@ -6,26 +6,92 @@ THEME = "plotly_white"
 MAX_POINTS_PER_TRACE = 50_000
 
 SENSORS_TO_PLOT = [
-    {"column": "PT-OX-02", "name": "PT-OX-02", "color": "#DFD91F", "yaxis": "y1"},
-    {"column": "TC-OX-02", "name": "TC-OX-02", "color": "#A4CC10", "yaxis": "y2"},
-    {"column": "PT-OX-04", "name": "PT-OX-04", "color": "#FF7FD2", "yaxis": "y1"},
-    {"column": "PT-OX-201", "name": "PT-OX-201", "color": "#820857", "yaxis": "y1"},
-    {"column": "PI-OX-02", "name": "PI-OX-02", "color": "#1f77b4", "yaxis": "y4"},
-    {"column": "PI-OX-03", "name": "PI-OX-03", "color": "#ff7f0e", "yaxis": "y4"},
-    {"column": "FMS", "name": "FMS", "color": "#9467bd", "yaxis": "y3"},
+    # Oxidizer
+    {"column": "PT-OX-04", "name": "PT-OX-04", "color": "#391FE0", "yaxis": "y1"},
+    {"column": "PT-OX-02", "name": "PT-OX-02", "color": "#4199E1", "yaxis": "y1"},
+    {"column": "PT-OX-201", "name": "PT-OX-201", "color": "#97C1E4", "yaxis": "y1"},
+
+    {"column": "TC-OX-04", "name": "TC-OX-04", "color": "#2C6CCC", "yaxis": "y2"},
+    {"column": "TC-OX-02", "name": "TC-OX-02", "color": "#4491AD", "yaxis": "y2"},
+    {"column": "TC-OX-202", "name": "TC-OX-202", "color": "#9BC2DD", "yaxis": "y2"},
+
+    {"column": "PI-OX-02", "name": "PI-OX-02", "color": "#9a28b3", "yaxis": "y4"},
+    {"column": "PI-OX-03", "name": "PI-OX-03", "color": "#e662bc", "yaxis": "y4"},
+
+    {"column": "RTD-OX", "name": "RTD-OX", "color": "#286CD1", "yaxis": "y5"},
+
+    # Fuel
+    {"column": "PT-FU-04", "name": "PT-FU-04", "color": "#80240B", "yaxis": "y1"},
+    {"column": "PT-FU-02", "name": "PT-FU-02", "color": "#A3451D", "yaxis": "y1"},
+    {"column": "PT-FU-201", "name": "PT-FU-201", "color": "#C77047", "yaxis": "y1"},
+
+    {"column": "TC-FU-04", "name": "TC-FU-04", "color": "#D42828", "yaxis": "y2"},
+    {"column": "TC-FU-02", "name": "TC-FU-02", "color": "#BE3C47", "yaxis": "y2"},
+    {"column": "TC-FU-202", "name": "TC-FU-202", "color": "#B34C6C", "yaxis": "y2"},
+    #{"column": "TC-FU-VENT", "name": "TC-FU-VENT", "color": "#CD6DB8", "yaxis": "y2"},
+    #{"column": "TC-FU-BOTTOM", "name": "TC-FU-BOTTOM", "color": "#DA7C7C", "yaxis": "y2"},
+    #{"column": "TC-FU-UPPER", "name": "TC-FU-UPPER", "color": "#E7C1C1", "yaxis": "y2"},
+
+    {"column": "PI-FU-02", "name": "PI-FU-02", "color": "#e32a33", "yaxis": "y4"},
+    {"column": "PI-FU-03", "name": "PI-FU-03", "color": "#bd486f", "yaxis": "y4"},
+
+    {"column": "RTD-FU", "name": "RTD-FU", "color": "#F70D0D", "yaxis": "y5"},
+
+    # N2
+    #{"column": "PT-N2-01", "name": "PT-N2-01", "color": "#CD3C9A", "yaxis": "y1"},
+    #{"column": "REED-N2-02", "name": "REED-N2-02", "color": "#900961", "yaxis": "y4"},
+
+    # He
+    {"column": "PT-HE-01", "name": "PT-HE-01", "color": "#2EB613", "yaxis": "y1"},
+    {"column": "PT-HE-201", "name": "PT-HE-201", "color": "#87D197", "yaxis": "y1"},
+
+    {"column": "TC-HE-201", "name": "TC-HE-201", "color": "#10842F", "yaxis": "y2"},
+
+    #{"column": "SV-HE-201-position", "name": "SV-HE-201-position", "color": "#2F6FA7", "yaxis": "y4"},
+    #{"column": "SV-HE-202-position", "name": "SV-HE-202-position", "color": "#DF2D36", "yaxis": "y4"},
+
+    # Other
+    {"column": "FMS", "name": "FMS", "color": "#dada0a", "yaxis": "y3"},
+    #{"column": "PT-CHAMBER", "name": "PT-CHAMBER", "color": "#cd1052", "yaxis": "y1"},
+    #{"column": "PI-DELUGE", "name": "PI-DELUGE", "color": "#21bd99", "yaxis": "y4"},
+    #{"column": "REED-BP-01", "name": "REED-BP-01", "color": "#a55933", "yaxis": "y4"}
 ]
 
 X_AXIS_LABEL = "Time"
 Y_AXIS_LABELS = {
-    "y1": "Pressure (PSI)",
-    "y2": "Temperature (K)",
-    "y3": "Mass (lbs)",
+    "y1": "Pressure [psia]",
+    "y2": "Temperature [K]",
+    "y3": "Mass [lbf]",
     "y4": "Position Indicator (0/1)",
+    "y5": "RTD voltage [V]",
 }
 
 DEV5_TIME, DEV6_TIME = "Dev5_BCLS_ai_time", "Dev6_BCLS_ai_time"
-DEV5_CHANNELS = ["FMS", "PT-FU-04", "PT-OX-04", "TC-FU-04", "TC-HE-201"]
-DEV6_CHANNELS = ["TC-FU-202", "TC-OX-202", "TC-FU-VENT"]
+
+DEV5_CHANNELS = ["PT-FU-04",
+                 "PT-HE-01",
+                 "PT-OX-02",
+                 "PT-N2-01",
+                 "PT-FU-02",
+                 "PT-OX-02",
+                 "TC-OX-04",
+                 "TC-FU-04",
+                 "TC-OX-02",
+                 "TC-FU-02",
+                 "FMS",
+                 "RTD-OX",
+                 "RTD-FU",
+                 "PT-FU-202",
+                 "PT-OX-202",
+                 "TC-HE-201" 
+                ]
+
+DEV6_CHANNELS = ["TC-FU-BOTTOM",
+                 "TC-OX-202",
+                 "TC-FU-202",
+                 "TC-FU-UPPER",
+                 "PT-CHAMBER"
+                ]
 
 
 def _direct_pairs(cols):
