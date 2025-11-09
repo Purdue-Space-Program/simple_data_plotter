@@ -1,49 +1,143 @@
 import argparse, os, re
 from collections import defaultdict
 import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
+import random
 
-THEME = "plotly_white"
+THEME = "plotly_dark"
 MAX_POINTS_PER_TRACE = 50_000
+# MAX_POINTS_PER_TRACE = 5_000
 
-SENSORS_TO_PLOT = [
-    # Oxidizer
-    {"column": "PT-OX-04", "name": "PT-OX-04", "color": "#391FE0", "yaxis": "y1"},
-    {"column": "PT-OX-02", "name": "PT-OX-02", "color": "#4199E1", "yaxis": "y1"},
-    {"column": "PT-OX-201", "name": "PT-OX-201", "color": "#97C1E4", "yaxis": "y1"},
-    {"column": "PT-OX-202", "name": "PT-OX-202", "color": "#CFD7DE", "yaxis": "y1"},
-    {"column": "TC-OX-04", "name": "TC-OX-04", "color": "#2C6CCC", "yaxis": "y2"},
-    {"column": "TC-OX-02", "name": "TC-OX-02", "color": "#4491AD", "yaxis": "y2"},
-    {"column": "TC-OX-202", "name": "TC-OX-202", "color": "#9BC2DD", "yaxis": "y2"},
-    {"column": "PI-OX-02", "name": "PI-OX-02", "color": "#9a28b3", "yaxis": "y4"},
-    {"column": "PI-OX-03", "name": "PI-OX-03", "color": "#e662bc", "yaxis": "y4"},
-    {"column": "RTD-OX", "name": "RTD-OX", "color": "#286CD1", "yaxis": "y5"},
-    # Fuel
-    {"column": "PT-FU-04", "name": "PT-FU-04", "color": "#80240B", "yaxis": "y1"},
-    {"column": "PT-FU-02", "name": "PT-FU-02", "color": "#A3451D", "yaxis": "y1"},
-    {"column": "PT-FU-201", "name": "PT-FU-201", "color": "#C77047", "yaxis": "y1"},
-    {"column": "PT-FU-202", "name": "PT-FU-202", "color": "#F6B090", "yaxis": "y1"},
-    {"column": "TC-FU-04", "name": "TC-FU-04", "color": "#D42828", "yaxis": "y2"},
-    {"column": "TC-FU-02", "name": "TC-FU-02", "color": "#BE3C47", "yaxis": "y2"},
-    {"column": "TC-FU-202", "name": "TC-FU-202", "color": "#B34C6C", "yaxis": "y2"},
-    {"column": "PI-FU-02", "name": "PI-FU-02", "color": "#e32a33", "yaxis": "y4"},
-    {"column": "PI-FU-03", "name": "PI-FU-03", "color": "#bd486f", "yaxis": "y4"},
-    {"column": "RTD-FU", "name": "RTD-FU", "color": "#F70D0D", "yaxis": "y5"},
-    # He
-    {"column": "PT-HE-01", "name": "PT-HE-01", "color": "#2EB613", "yaxis": "y1"},
-    {"column": "PT-HE-201", "name": "PT-HE-201", "color": "#87D197", "yaxis": "y1"},
-    {"column": "TC-HE-201", "name": "TC-HE-201", "color": "#10842F", "yaxis": "y2"},
-    # Other
-    {"column": "FMS", "name": "FMS", "color": "#dada0a", "yaxis": "y3"},
-]
+
+use_davids_auto_sensors = True
+
+if use_davids_auto_sensors == False:
+
+    SENSORS_TO_PLOT = [
+        # Oxidizer
+        {"column": "PT-OX-04", "name": "PT-OX-04", "color": "#391FE0", "yaxis": "y1"},
+        {"column": "PT-OX-02", "name": "PT-OX-02", "color": "#4199E1", "yaxis": "y1"},
+        {"column": "PT-OX-201", "name": "PT-OX-201", "color": "#97C1E4", "yaxis": "y1"},
+        {"column": "PT-OX-202", "name": "PT-OX-202", "color": "#CFD7DE", "yaxis": "y1"},
+        {"column": "TC-OX-04", "name": "TC-OX-04", "color": "#2C6CCC", "yaxis": "y2"},
+        {"column": "TC-OX-02", "name": "TC-OX-02", "color": "#4491AD", "yaxis": "y2"},
+        {"column": "TC-OX-202", "name": "TC-OX-202", "color": "#9BC2DD", "yaxis": "y2"},
+        {"column": "PI-OX-02", "name": "PI-OX-02", "color": "#9a28b3", "yaxis": "y4"},
+        {"column": "PI-OX-03", "name": "PI-OX-03", "color": "#e662bc", "yaxis": "y4"},
+        {"column": "RTD-OX", "name": "RTD-OX", "color": "#286CD1", "yaxis": "y5"},
+        # Fuel
+        {"column": "PT-FU-04", "name": "PT-FU-04", "color": "#80240B", "yaxis": "y1"},
+        {"column": "PT-FU-02", "name": "PT-FU-02", "color": "#A3451D", "yaxis": "y1"},
+        {"column": "PT-FU-201", "name": "PT-FU-201", "color": "#C77047", "yaxis": "y1"},
+        {"column": "PT-FU-202", "name": "PT-FU-202", "color": "#F6B090", "yaxis": "y1"},
+        {"column": "TC-FU-04", "name": "TC-FU-04", "color": "#D42828", "yaxis": "y2"},
+        {"column": "TC-FU-02", "name": "TC-FU-02", "color": "#BE3C47", "yaxis": "y2"},
+        {"column": "TC-FU-202", "name": "TC-FU-202", "color": "#B34C6C", "yaxis": "y2"},
+        {"column": "PI-FU-02", "name": "PI-FU-02", "color": "#e32a33", "yaxis": "y4"},
+        {"column": "PI-FU-03", "name": "PI-FU-03", "color": "#bd486f", "yaxis": "y4"},
+        {"column": "RTD-FU", "name": "RTD-FU", "color": "#F70D0D", "yaxis": "y5"},
+        # He
+        {"column": "PT-HE-01", "name": "PT-HE-01", "color": "#2EB613", "yaxis": "y1"},
+        {"column": "PT-HE-201", "name": "PT-HE-201", "color": "#87D197", "yaxis": "y1"},
+        {"column": "TC-HE-201", "name": "TC-HE-201", "color": "#10842F", "yaxis": "y2"},
+        # Other
+        {"column": "FMS", "name": "FMS", "color": "#dada0a", "yaxis": "y3"},
+    ]
+
+else:
+
+    sensors_to_plot_names = [
+        "PT-OX-02",
+        "PT-OX-04",
+        "PT-OX-201"
+        "PT-OX-202",
+        
+        "TC-OX-02",
+        "TC-OX-04",
+        "TC-OX-202",
+        "TC-OX-201"
+        "RTD-OX"
+        
+        "PI-OX-02",
+        "PI-OX-03",
+        
+        "PT-FU-04",
+        "PT-FU-02",
+        "PT-FU-201",
+        "PT-FU-202",
+        
+        "TC-FU-04",
+        "TC-FU-02",
+        "TC-FU-202",
+        "TC-FU-201",
+        "RTD-FU", 
+        
+        "PI-FU-02",
+        "PI-FU-03",
+        
+        "FMS",
+    ]
+
+
+    def FluidNameToColor(name: str) -> str:
+        name_upper = name.upper()
+
+        if "-OX" in name_upper:
+            # sensor_color = "#3EABFF"
+            # Random shade of blue
+            r = random.randint(0, 100)   # low red
+            g = random.randint(100, 200) # mid green
+            b = random.randint(200, 255) # strong blue
+            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+        elif "-FU" in name_upper:
+            # sensor_color = "#6D0000"
+            # Random shade of red
+            r = random.randint(200, 255)   # strong red
+            g = random.randint(50, 150) # mid green
+            b = random.randint(0, 100) # low blue
+            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+        elif "FMS" in name_upper:
+            sensor_color = "#DCEB0E"
+        else:
+            sensor_color = "#000000"
+        
+        return(sensor_color)
+
+    def SensorTypeToAxis(name: str) -> str:
+        name_upper = name.upper()
+
+        if "PT" in name_upper:
+            sensor_axis = "y1"
+        elif "PI-" in name_upper:
+            sensor_axis = "y2"
+        elif "TC-" in name_upper:
+            sensor_axis = "y3"
+        elif "RTD-" in name_upper:
+            sensor_axis = "y4"
+        elif "FMS" in name_upper:
+            sensor_axis = "y5"
+        else:
+            sensor_axis = "y6"
+
+        return(sensor_axis)
+
+    SENSORS_TO_PLOT = []
+
+    for sensor_name in sensors_to_plot_names:
+        sensor_color = FluidNameToColor(sensor_name)
+        sensor_axis = SensorTypeToAxis(sensor_name)
+        SENSORS_TO_PLOT.append({"column": sensor_name, "name": sensor_name, "color": sensor_color, "yaxis": sensor_axis},)
+
 
 X_AXIS_LABEL = "Time"
 Y_AXIS_LABELS = {
     "y1": "Pressure [psia]",
-    "y2": "Temperature [K]",
-    "y3": "Mass [lbf]",
-    "y4": "Position Indicator (0/1)",
-    "y5": "RTD voltage [V]",
+    "y2": "Position Indicator [0/1]",
+    "y3": "Fuel Temperature [°K]",
+    "y4": "RTD Voltage (V)",
+    "y5": "Mass (lbf)",
+    "y6": "unknown sensor",
 }
+
 
 DEV5_TIME, DEV6_TIME = "Dev5_BCLS_ai_time", "Dev6_BCLS_ai_time"
 
@@ -66,10 +160,16 @@ DEV5_CHANNELS = [
     "TC-HE-201",
 ]
 
-DEV6_CHANNELS = ["TC-FU-BOTTOM", "TC-OX-202", "TC-FU-202", "TC-FU-UPPER", "PT-CHAMBER"]
+DEV6_CHANNELS = [
+    "TC-FU-BOTTOM", 
+    "TC-OX-202", 
+    "TC-FU-202", 
+    "TC-FU-UPPER", 
+    "PT-CHAMBER"
+]
 
 
-def _direct_pairs(cols):
+def DirectPairs(cols):
     pairs = defaultdict(list)
     for c in cols:
         if c.lower().endswith("_time"):
@@ -79,7 +179,7 @@ def _direct_pairs(cols):
     return pairs
 
 
-def _pi_pairs(cols):
+def MakePIPairs(cols):
     pairs = defaultdict(list)
     for c in cols:
         m = re.match(r"^BCLS_di_time_(.+)$", c)
@@ -88,33 +188,41 @@ def _pi_pairs(cols):
     return pairs
 
 
-def _bcls_pairs(cols):
-    pairs = defaultdict(list)
+def BCLSPairs(cols):
+    # pairs = defaultdict(list)
+    pairs = {}
+    
+    # for sensor in sensors_to_plot_names:
+    #     if sensor in DEV5_TIME:
+            
+    
+    
+    
     if DEV5_TIME in cols:
         for ch in DEV5_CHANNELS:
             if ch in cols:
-                pairs[DEV5_TIME].append(ch)
+                pairs[DEV5_TIME] = ch
     if DEV6_TIME in cols:
         for ch in DEV6_CHANNELS:
             if ch in cols:
-                pairs[DEV6_TIME].append(ch)
+                pairs[DEV6_TIME] = ch
     return pairs
 
 
-def _find_groups(cols):
+def FindGroups(cols):
     groups = defaultdict(list)
-    for d in (_direct_pairs(cols), _pi_pairs(cols), _bcls_pairs(cols)):
+    for d in (DirectPairs(cols), MakePIPairs(cols), BCLSPairs(cols)):
         for t, ds in d.items():
             groups[t].extend(ds)
     return groups
 
 
-def csv_to_parquet(input_csv: str) -> str:
+def ConvertCSVToParquet(input_csv: str) -> str:
     """Optimized CSV to Parquet conversion"""
     print("Reading CSV header...")
     header = pd.read_csv(input_csv, nrows=0)
     cols = list(header.columns)
-    groups = _find_groups(cols)
+    groups = FindGroups(cols)
 
     if not groups:
         raise ValueError("No valid time-column groupings found in CSV")
@@ -130,42 +238,42 @@ def csv_to_parquet(input_csv: str) -> str:
         input_csv,
         usecols=list(usecols),
         low_memory=False,
-        on_bad_lines="skip",
+        on_bad_lines="warn",
         engine="c",
     )
 
     print("Processing time groups...")
     all_frames = []
 
-    for tcol, dcols in groups.items():
-        if tcol not in df.columns:
+    for time_column, data_columns in groups.items():
+        if time_column not in df.columns:
             continue
 
         # Create subset with time column and data columns
-        subset_cols = [tcol] + [c for c in dcols if c in df.columns]
+        subset_cols = [time_column] + [c for c in data_columns if c in df.columns]
         subset = df[subset_cols].copy()
 
         # Convert time column to datetime
-        subset[tcol] = pd.to_datetime(subset[tcol], errors="coerce", utc=True)
-        subset = subset.dropna(subset=[tcol])
+        subset[time_column] = pd.to_datetime(subset[time_column], errors="coerce", utc=True)
+        subset = subset.dropna(subset=[time_column])
 
         if subset.empty:
             continue
 
         # Set time as index
-        subset = subset.set_index(tcol)
+        subset = subset.set_index(time_column)
 
         # Handle duplicate indices BEFORE adding to all_frames
         if subset.index.duplicated().any():
             subset = subset.groupby(level=0).mean()
 
         # Convert all data columns to numeric at once
-        for c in dcols:
+        for c in data_columns:
             if c in subset.columns:
                 subset[c] = pd.to_numeric(subset[c], errors="coerce")
 
         all_frames.append(subset)
-        print(f"  Processed {tcol}: {len(subset)} rows, {len(subset.columns)} sensors")
+        print(f"  Processed {time_column}: {len(subset)} rows, {len(subset.columns)} sensors")
 
     if not all_frames:
         raise ValueError("No valid data found after processing all groups")
@@ -176,7 +284,9 @@ def csv_to_parquet(input_csv: str) -> str:
     combined = combined.reset_index().rename(columns={"index": "timestamp"})
 
     # Save to parquet
-    parquet_path = os.path.splitext(input_csv)[0] + ".parquet"
+    base = os.path.splitext(input_csv)[0]
+    parquet_path = f"{base}.parquet"
+    
     print(f"Saving to {parquet_path}...")
     combined.to_parquet(parquet_path, index=False, engine="pyarrow")
 
@@ -187,7 +297,10 @@ def csv_to_parquet(input_csv: str) -> str:
 
 
 def _thin(x, y, maxn):
-    if maxn is None or len(y) <= maxn:
+    if maxn is None:
+        raise ValueError
+    
+    if len(y) <= maxn:
         return x.values, y.values
     idx = np.linspace(0, len(y) - 1, maxn, dtype=int)
     return x.values[idx], y.values[idx]
@@ -279,26 +392,40 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
 
 
 def main():
+    
+    DEFAULT_PATH = "data/datadump_11-6-whatisevenhappening.csv"
+    _SENTINEL = object()
+
     ap = argparse.ArgumentParser()
-    ap.add_argument("input_path")
+
+    ap.add_argument(
+        "input_path",
+        nargs="?",
+        default=_SENTINEL,
+    )
+
     ap.add_argument("--start", default=None)
     ap.add_argument("--end", default=None)
+
     args = ap.parse_args()
 
-    os.makedirs("data", exist_ok=True)
-    os.makedirs("output", exist_ok=True)
 
-    path = args.input_path
-    base = os.path.splitext(os.path.basename(path))[0]
+    if args.input_path is _SENTINEL:
+        # user did NOT provide input_path
+        print(f"WARNING!!!!!!!!!!! No input file provided, using default input path: {DEFAULT_PATH}")
+        args.input_path = DEFAULT_PATH
 
-    if path.lower().endswith(".csv"):
-        parquet_path = csv_to_parquet(path)
-    elif path.lower().endswith((".parquet", ".pq")):
-        parquet_path = path
+    path_to_input_file = args.input_path
+    input_file_name = os.path.splitext(os.path.basename(path_to_input_file))[0]
+
+    if path_to_input_file.lower().endswith(".csv"):
+        parquet_path = ConvertCSVToParquet(path_to_input_file)
+    elif path_to_input_file.lower().endswith((".parquet", ".pq")):
+        parquet_path = path_to_input_file
     else:
         raise SystemExit("input must be .csv or .parquet")
 
-    html_out = os.path.join("output", f"{base}.html")
+    html_out = os.path.join("output", f"{input_file_name}.html")
     plot_parquet(parquet_path, html_out, args.start, args.end)
     print(f"\n✓ Complete! Plot saved to: {html_out}")
 
