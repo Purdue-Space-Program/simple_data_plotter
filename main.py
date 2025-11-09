@@ -48,14 +48,14 @@ else:
     sensors_to_plot_names = [
         "PT-OX-02",
         "PT-OX-04",
-        "PT-OX-201"
+        "PT-OX-201",
         "PT-OX-202",
         
         "TC-OX-02",
         "TC-OX-04",
         "TC-OX-202",
-        "TC-OX-201"
-        "RTD-OX"
+        "TC-OX-201",
+        "RTD-OX",
         
         "PI-OX-02",
         "PI-OX-03",
@@ -165,53 +165,148 @@ DEV6_CHANNELS = [
     "TC-OX-202", 
     "TC-FU-202", 
     "TC-FU-UPPER", 
-    "PT-CHAMBER"
+    "PT-CHAMBER",
 ]
 
-
-def DirectPairs(cols):
-    pairs = defaultdict(list)
-    for c in cols:
-        if c.lower().endswith("_time"):
-            base = re.sub(r"(_time|_TIME)$", "", c)
-            if base in cols:
-                pairs[c].append(base)
-    return pairs
+channels = [
+    [DEV5_CHANNELS, DEV5_TIME], 
+    [DEV6_CHANNELS, DEV6_TIME]
+    ]
 
 
-def MakePIPairs(cols):
-    pairs = defaultdict(list)
-    for c in cols:
-        m = re.match(r"^BCLS_di_time_(.+)$", c)
-        if m and m.group(1) in cols:
-            pairs[c].append(m.group(1))
-    return pairs
-
-
-def BCLSPairs(cols):
-    # pairs = defaultdict(list)
+def DirectPairs(csv_columns):
+    print("\nDirectPairs")
+    
     pairs = {}
     
-    # for sensor in sensors_to_plot_names:
-    #     if sensor in DEV5_TIME:
+    for csv_column in csv_columns:        
+        
+        if csv_column.lower().endswith("_time"):
+            sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
             
+            for channel, time in channels:
+                # check if it is time
+                # if (csv_column in (c[1] for c in channels)):
+                #     pairs[time] = [sensor_name]
+
+                # elif sensor_name in channel:
+                if sensor_name in sensors_to_plot_names:
+                    pairs[csv_column] = [sensor_name]
+
+                elif channel == channels[-1][0]:
+                    print(f"Warning: Column '{sensor_name}' not found; skipping.")
+
+
+    ##### compare with old version
+    print (f"\n{pairs}")
+    pairs = None
+
+    pairs = defaultdict(list)
+    for c in csv_columns:
+        if c.lower().endswith("_time"):
+            base = re.sub(r"(_time|_TIME)$", "", c)
+            if base in csv_columns:
+                pairs[c].append(base)
+
+    print (f"\n{pairs}\n")
+    ##### compare with old version
     
-    
-    
-    if DEV5_TIME in cols:
-        for ch in DEV5_CHANNELS:
-            if ch in cols:
-                pairs[DEV5_TIME] = ch
-    if DEV6_TIME in cols:
-        for ch in DEV6_CHANNELS:
-            if ch in cols:
-                pairs[DEV6_TIME] = ch
     return pairs
 
 
-def FindGroups(cols):
+def MakePIPairs(csv_columns):
+    
+    print("\nMakePIPairs")
+    
+    pairs = {}
+    
+    for csv_column in csv_columns:
+        # if csv_column == "BCLS_di_time_PI-OX-02":
+        #     pass
+        m = re.match(r"^BCLS_di_time_(.+)$", csv_column)
+        
+        if m != None:
+            sensor_name = m.group(1)
+        
+            if (m and sensor_name in csv_columns):
+
+                if sensor_name in sensors_to_plot_names:
+                    pairs[csv_column] = [m.group(1)]
+            else:
+                print(f"Warning: Column '{csv_column}' not found; skipping.")
+
+        else:
+            print(f"Warning: Column '{csv_column}' not found; skipping.")
+
+    # ######### compare with old version
+    # print(f"\n{pairs}")
+    # pairs = None        
+        
+    # pairs = defaultdict(list)
+    
+    # for csv_column in csv_columns:
+    #     # if csv_column == "BCLS_di_time_PI-OX-02":
+    #     #     pass
+    #     m = re.match(r"^BCLS_di_time_(.+)$", csv_column)
+    #     if m and m.group(1) in csv_columns:
+    #         pairs[csv_column].append(m.group(1))
+            
+
+    # print(f"\n{pairs}\n")
+    # ######### compare with old version
+    
+    return pairs
+
+
+def BCLSPairs(csv_columns):
+    print("\nBCLSPairs")
+    
+    pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
+
+    for channel, time in channels:
+        if time in csv_columns:
+            for sensor_name in channel:
+                
+                # print(f"\n{sensor_name}")
+                # print(f"(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns): {(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns)}")
+                # print(f"sensor_name in csv_columns: {sensor_name in csv_columns}")
+                
+                if (sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns):
+                # if sensor_name in csv_columns:
+                
+                
+                    pairs[time].append(sensor_name)
+
+                elif channel == channels[-1][0]:
+                    print(f"Warning: Column '{sensor_name}' not found; skipping.")
+
+
+
+
+    # ############ compare with old version
+    # print(f"\n{pairs}")
+    # pairs = None                
+            
+    # pairs = defaultdict(list)
+    
+    # if DEV5_TIME in csv_columns:
+    #     for ch in DEV5_CHANNELS:
+    #         if ch in csv_columns:
+    #             pairs[DEV5_TIME].append(ch)
+    # if DEV6_TIME in csv_columns:
+    #     for ch in DEV6_CHANNELS:
+    #         if ch in csv_columns:
+    #             pairs[DEV6_TIME].append(ch)
+
+    # print(f"\n{pairs}\n")
+    # ############ compare with old version
+
+    return(pairs)
+
+
+def FindGroups(csv_columns):
     groups = defaultdict(list)
-    for d in (DirectPairs(cols), MakePIPairs(cols), BCLSPairs(cols)):
+    for d in (DirectPairs(csv_columns), MakePIPairs(csv_columns), BCLSPairs(csv_columns)):
         for t, ds in d.items():
             groups[t].extend(ds)
     return groups
@@ -221,8 +316,8 @@ def ConvertCSVToParquet(input_csv: str) -> str:
     """Optimized CSV to Parquet conversion"""
     print("Reading CSV header...")
     header = pd.read_csv(input_csv, nrows=0)
-    cols = list(header.columns)
-    groups = FindGroups(cols)
+    csv_columns = list(header.columns)
+    groups = FindGroups(csv_columns)
 
     if not groups:
         raise ValueError("No valid time-column groupings found in CSV")
