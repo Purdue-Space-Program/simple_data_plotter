@@ -43,9 +43,11 @@ if use_davids_auto_sensors == False:
         {"column": "FMS", "name": "FMS", "color": "#dada0a", "yaxis": "y3"},
     ]
 
+    SENSORS_TO_PLOT_NAMES = [sensor["name"] for sensor in SENSORS_TO_PLOT]
+
 else:
 
-    sensors_to_plot_names = [
+    SENSORS_TO_PLOT_NAMES = [
         "PT-OX-02",
         "PT-OX-04",
         "PT-OX-201",
@@ -74,6 +76,10 @@ else:
         "PI-FU-02",
         "PI-FU-03",
         
+        "PT-HE-01",
+        "PT-HE-201",
+        "TC-HE-201",
+        
         "FMS",
     ]
 
@@ -84,16 +90,35 @@ else:
         if "-OX" in name_upper:
             # sensor_color = "#3EABFF"
             # Random shade of blue
-            r = random.randint(0, 100)   # low red
-            g = random.randint(100, 200) # mid green
-            b = random.randint(200, 255) # strong blue
+            r = random.randint(0, 100)
+            g = random.randint(100, 200)
+            b = random.randint(200, 255)
             sensor_color = f"#{r:02X}{g:02X}{b:02X}"
         elif "-FU" in name_upper:
             # sensor_color = "#6D0000"
             # Random shade of red
-            r = random.randint(200, 255)   # strong red
-            g = random.randint(50, 150) # mid green
-            b = random.randint(0, 100) # low blue
+            r = random.randint(200, 255)
+            g = random.randint(50, 150)
+            b = random.randint(0, 100)
+            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+        elif "-HE" in name_upper:
+            # sensor_color = "#6D0000"
+            # Random shade of green
+            r = random.randint(0, 100)
+            g = random.randint(200, 255)
+            b = random.randint(0, 100)
+            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+        elif "-N2" in name_upper:
+            # Random shade of purple
+            r = random.randint(200, 255)
+            g = random.randint(0, 100)
+            b = random.randint(200, 255)
+            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+        elif "-WA" in name_upper:
+            # Random shade of blue
+            r = random.randint(0, 100)
+            g = random.randint(100, 200)
+            b = random.randint(200, 255)
             sensor_color = f"#{r:02X}{g:02X}{b:02X}"
         elif "FMS" in name_upper:
             sensor_color = "#DCEB0E"
@@ -122,13 +147,13 @@ else:
 
     SENSORS_TO_PLOT = []
 
-    for sensor_name in sensors_to_plot_names:
+    for sensor_name in SENSORS_TO_PLOT_NAMES:
         sensor_color = FluidNameToColor(sensor_name)
         sensor_axis = SensorTypeToAxis(sensor_name)
         SENSORS_TO_PLOT.append({"column": sensor_name, "name": sensor_name, "color": sensor_color, "yaxis": sensor_axis},)
 
 
-X_AXIS_LABEL = "Time"
+X_AXIS_LABEL = "Time [H:M:S:milliseconds]"
 Y_AXIS_LABELS = {
     "y1": "Pressure [psia]",
     "y2": "Position Indicator [0/1]",
@@ -175,7 +200,7 @@ channels = [
 
 
 def DirectPairs(csv_columns):
-    print("\nDirectPairs")
+    # print("\nDirectPairs")
     
     pairs = {}
     
@@ -190,33 +215,32 @@ def DirectPairs(csv_columns):
                 #     pairs[time] = [sensor_name]
 
                 # elif sensor_name in channel:
-                if sensor_name in sensors_to_plot_names:
+                if sensor_name in SENSORS_TO_PLOT_NAMES:
                     pairs[csv_column] = [sensor_name]
 
                 elif channel == channels[-1][0]:
                     print(f"Warning: Column '{sensor_name}' not found; skipping.")
 
 
-    ##### compare with old version
-    print (f"\n{pairs}")
-    pairs = None
+    # ##### compare with old version
+    # print (f"\n{pairs}")
+    # pairs = None
 
-    pairs = defaultdict(list)
-    for c in csv_columns:
-        if c.lower().endswith("_time"):
-            base = re.sub(r"(_time|_TIME)$", "", c)
-            if base in csv_columns:
-                pairs[c].append(base)
+    # pairs = defaultdict(list)
+    # for c in csv_columns:
+    #     if c.lower().endswith("_time"):
+    #         base = re.sub(r"(_time|_TIME)$", "", c)
+    #         if base in csv_columns:
+    #             pairs[c].append(base)
 
-    print (f"\n{pairs}\n")
-    ##### compare with old version
+    # print (f"\n{pairs}\n")
+    # ##### compare with old version
     
     return pairs
 
 
 def MakePIPairs(csv_columns):
-    
-    print("\nMakePIPairs")
+    # print("\nMakePIPairs")
     
     pairs = {}
     
@@ -230,7 +254,7 @@ def MakePIPairs(csv_columns):
         
             if (m and sensor_name in csv_columns):
 
-                if sensor_name in sensors_to_plot_names:
+                if sensor_name in SENSORS_TO_PLOT_NAMES:
                     pairs[csv_column] = [m.group(1)]
             else:
                 print(f"Warning: Column '{csv_column}' not found; skipping.")
@@ -259,7 +283,7 @@ def MakePIPairs(csv_columns):
 
 
 def BCLSPairs(csv_columns):
-    print("\nBCLSPairs")
+    # print("\nBCLSPairs")
     
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
 
@@ -271,7 +295,7 @@ def BCLSPairs(csv_columns):
                 # print(f"(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns): {(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns)}")
                 # print(f"sensor_name in csv_columns: {sensor_name in csv_columns}")
                 
-                if (sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns):
+                if (sensor_name in SENSORS_TO_PLOT_NAMES) and (sensor_name in csv_columns):
                 # if sensor_name in csv_columns:
                 
                 
@@ -424,8 +448,8 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
     used_axes = []
     traces_added = 0
 
-    for s in SENSORS_TO_PLOT:
-        c = s["column"]
+    for sensor in SENSORS_TO_PLOT:
+        c = sensor["column"]
         if c not in df.columns:
             continue
 
@@ -436,7 +460,7 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
             continue
 
         x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
-        yaxis_key = s.get("yaxis", "y1").lower()
+        yaxis_key = sensor.get("yaxis", "y1").lower()
 
         if yaxis_key not in used_axes:
             used_axes.append(yaxis_key)
@@ -446,13 +470,13 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
                 x=x_vals,
                 y=y_vals,
                 mode="lines",
-                name=s.get("name", c),
-                line=dict(color=s.get("color")),
+                name=sensor.get("name", c),
+                line=dict(color=sensor.get("color")),
                 yaxis=_trace_axis_id(yaxis_key),
             )
         )
         traces_added += 1
-        print(f"  Added trace: {s.get('name', c)} ({len(y_vals)} points)")
+        print(f"  Added trace: {sensor.get('name', c)} ({len(y_vals)} points)")
 
     if traces_added == 0:
         print("WARNING: No traces were added to the plot!")
