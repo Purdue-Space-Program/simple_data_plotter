@@ -245,22 +245,20 @@ def MakePIPairs(csv_columns):
     pairs = {}
     
     for csv_column in csv_columns:
-        # if csv_column == "BCLS_di_time_PI-OX-02":
-        #     pass
         m = re.match(r"^BCLS_di_time_(.+)$", csv_column)
         
         if m != None:
             sensor_name = m.group(1)
-        
-            if (m and sensor_name in csv_columns):
+            if sensor_name in SENSORS_TO_PLOT_NAMES:
+            
+                if (m and sensor_name in csv_columns):
 
-                if sensor_name in SENSORS_TO_PLOT_NAMES:
-                    pairs[csv_column] = [m.group(1)]
+                        pairs[csv_column] = [m.group(1)]
+                        
+                        
             else:
                 print(f"Warning: Column '{csv_column}' not found; skipping.")
 
-        else:
-            print(f"Warning: Column '{csv_column}' not found; skipping.")
 
     # ######### compare with old version
     # print(f"\n{pairs}")
@@ -291,18 +289,12 @@ def BCLSPairs(csv_columns):
         if time in csv_columns:
             for sensor_name in channel:
                 
-                # print(f"\n{sensor_name}")
-                # print(f"(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns): {(sensor_name in sensors_to_plot_names) and (sensor_name in csv_columns)}")
-                # print(f"sensor_name in csv_columns: {sensor_name in csv_columns}")
-                
-                if (sensor_name in SENSORS_TO_PLOT_NAMES) and (sensor_name in csv_columns):
-                # if sensor_name in csv_columns:
-                
-                
-                    pairs[time].append(sensor_name)
+                if sensor_name in csv_columns:
+                    if (sensor_name in SENSORS_TO_PLOT_NAMES):
+                        pairs[time].append(sensor_name)
 
-                elif channel == channels[-1][0]:
-                    print(f"Warning: Column '{sensor_name}' not found; skipping.")
+                    elif channel == channels[-1][0]:
+                        print(f"Warning: Column '{sensor_name}' not found; skipping.")
 
 
 
@@ -433,7 +425,35 @@ def _layout_axis_key(k):
     return "yaxis" if k.lower() == "y1" else f"yaxis{int(k[1:])}"
 
 
-def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str | None):
+# def AssignLegendGroup(sensor_name):
+#     """
+#     Convert a sensor name like 'PT-OX-04' → 'OX_PT'.
+#     If it doesn't match the pattern, return 'OTHER_MISC'.
+#     """
+#     m = re.match(r"([A-Z]+)-([A-Z]+)", sensor_name)
+#     if m:
+#         sensor_type, system = m.groups()
+#         legend_group_name = f"{system}_{sensor_type}"
+#     else:
+#         legend_group_name = "OTHER_MISC"
+#     return legend_group_name
+
+
+    # def ChangeVisibility(fig, fluid_abbreviation, current_visibility, should_be_visible):
+    #     """Return a list of True/False for each trace depending on whether its name contains system."""
+    #     new_visibility = []
+    #     for index, trace in enumerate(fig.data):
+    #         name = trace.name or ""
+    #         if fluid_abbreviation in name:
+    #             new_visibility.append(should_be_visible)
+    #         else:
+    #             new_visibility.append(current_visibility[index])
+
+    #     return new_visibility    
+
+
+
+def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | None):
     pio.templates.default = THEME
     print("Loading parquet file...")
     df = pd.read_parquet(parquet_path)
@@ -449,11 +469,11 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
     traces_added = 0
 
     for sensor in SENSORS_TO_PLOT:
-        c = sensor["column"]
-        if c not in df.columns:
+        column = sensor["column"]
+        if column not in df.columns:
             continue
 
-        y = pd.to_numeric(df[c], errors="coerce")
+        y = pd.to_numeric(df[column], errors="coerce")
         mask = y.notna()
 
         if not mask.any():
@@ -465,18 +485,293 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
         if yaxis_key not in used_axes:
             used_axes.append(yaxis_key)
 
+
+
         fig.add_trace(
             go.Scatter(
                 x=x_vals,
                 y=y_vals,
                 mode="lines",
-                name=sensor.get("name", c),
+                name=sensor.get("name", column),
                 line=dict(color=sensor.get("color")),
                 yaxis=_trace_axis_id(yaxis_key),
+     
             )
         )
         traces_added += 1
-        print(f"  Added trace: {sensor.get('name', c)} ({len(y_vals)} points)")
+        print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
+
+
+    
+        
+    fig.update_layout(
+        updatemenus=[
+            dict(
+                type="buttons",
+                showactive=False,
+                buttons=[
+                    dict(
+                        label="Toggle OX",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_ox",
+                    ),
+                    dict(
+                        label="Toggle FU",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_fu",
+                    ),
+                    dict(
+                        label="Toggle HE",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_he",
+                    ),
+                    dict(
+                        label="Toggle PT",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_pt",
+                    ),
+                    dict(
+                        label="Toggle TC",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_tc",
+                    ),
+                    dict(
+                        label="Toggle RTD",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_rtd",
+                    ),
+                    dict(
+                        label="Toggle PI",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_pi",
+                    ),
+                    dict(
+                        label="Toggle FMS",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_fms",
+                    ),
+                    dict(
+                        label="Show ALL",
+                        method="update",
+                        args=[{}, {}],
+                        name="btn_all",
+                    ),
+                ],
+                direction="down",
+                pad=dict(r=10, t=10),
+                bgcolor="#333",
+                font=dict(color="white"),
+            )
+        ]
+    )
+
+
+
+
+    def export_plot_with_dynamic_buttons(fig, path, div_id="my_fig"):
+        """Export Plotly HTML with JS that adds dynamic group toggling."""
+
+        # Step 1 — save HTML normally
+        fig.write_html(path, include_plotlyjs="cdn", full_html=True, div_id=div_id)
+
+        # Step 2 — JavaScript code for real-time group toggle
+        js_code = """
+                <script>
+                (function(){
+                    function toggleGroup(tag) {
+                    const gd = document.getElementById("my_fig");
+                    if (!gd) return;
+
+                    const data = gd.data;
+
+                    // Determine which traces belong to this group
+                    const groupIdx = [];
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i].name && data[i].name.includes(tag)) {
+                            groupIdx.push(i);
+                        }
+                    }
+
+                    if (tag === "ALL") {
+                        // Show everything
+                        Plotly.restyle(gd, {visible: true});
+                        return;
+                    }
+
+                    // Get current group visibility (treat undefined as visible)
+                    const groupVis = groupIdx.map(i =>
+                        (data[i].visible === undefined || data[i].visible)
+                    );
+
+                    // If ANY are visible → turn ALL off
+                    // If ALL are hidden → turn ALL on
+                    const target = groupVis.some(v => v) ? false : true;
+
+                    // Build final visibility array
+                    let vis = data.map(t => (t.visible === undefined || t.visible));
+
+                    for (const idx of groupIdx) {
+                        vis[idx] = target;
+                    }
+
+                    Plotly.restyle(gd, {visible: vis});
+                    }
+
+
+                    // Helper: find a descendant element whose trimmed textContent equals label
+                    function findElementByExactText(root, label) {
+                        const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null, false);
+                        let node;
+                        while (node = walker.nextNode()) {
+                            const txt = (node.textContent || "").trim();
+                            if (txt === label) return node;
+                        }
+                        return null;
+                    }
+
+                    // Attach handlers once the buttons exist. Use MutationObserver to detect rendering.
+                    function attachWhenReady() {
+                    const gd = document.getElementById("my_fig");
+                    if (!gd) {
+                        console.warn("toggleGroup: plot div not found (#my_fig)");
+                        return;
+                    }
+
+                    // 🚀 UPDATED: 7 buttons
+                    const labels = [
+                        "Toggle OX",
+                        "Toggle FU",
+                        "Toggle HE",
+                        "Toggle PT",
+                        "Toggle TC",
+                        "Toggle RTD",
+                        "Toggle PI",
+                        "Toggle FMS",
+                        "Show ALL",
+                    ];
+
+                    const handlers = [
+                        () => toggleGroup("-OX"),
+                        () => toggleGroup("-FU"),
+                        () => toggleGroup("-HE"),
+                        () => toggleGroup("PT-"),
+                        () => toggleGroup("TC-"),
+                        () => toggleGroup("RTD-"),
+                        () => toggleGroup("PI-"),
+                        () => toggleGroup("FMS"),
+                        () => toggleGroup("ALL"),
+                    ];
+
+                    let attached = 0;
+                    const timeoutAt = Date.now() + 3000; // try up to 3s
+
+                    const tryAttach = () => {
+                        for (let i = 0; i < labels.length; i++) {
+                            const label = labels[i];
+                            const el = findElementByExactText(gd, label);
+                            if (el && !el.__toggle_attached) {
+                                el.addEventListener("click", handlers[i]);
+                                el.__toggle_attached = true;
+                                attached++;
+                                console.log("toggleGroup: attached handler to button:", label, el);
+                            }
+                        }
+                        if (attached === labels.length) {
+                            console.log("toggleGroup: all handlers attached");
+                            observer.disconnect();
+                            return;
+                        }
+                        if (Date.now() > timeoutAt) {
+                            console.warn("toggleGroup: timed out waiting for buttons; attached:", attached);
+                            observer.disconnect();
+                        }
+                    };
+
+                    // Try immediately in case elements are already present
+                    tryAttach();
+
+                    // Observe DOM changes to catch the buttons when Plotly renders them
+                    const observer = new MutationObserver(() => {
+                        tryAttach();
+                    });
+                    observer.observe(gd, { childList: true, subtree: true });
+                }
+
+                if (document.readyState === "complete" || document.readyState === "interactive") {
+                    setTimeout(attachWhenReady, 50);
+                } else {
+                    window.addEventListener("DOMContentLoaded", () => setTimeout(attachWhenReady, 50));
+                }
+                })();
+                </script>
+                """
+
+
+        # Step 3 — append JS before </body>
+        with open(path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        html = html.replace("</body>", js_code + "\n</body>")
+
+        # Step 4 — write modified HTML back
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+
+
+
+
+    # fig.update_layout(
+        
+    #     current_visibility = [trace.visible for trace in fig.data]
+
+    #     updatemenus=[
+    #         dict(
+    #             type="buttons",
+    #             showactive=False,
+    #             buttons=[
+    #                 dict(
+    #                     label="Toggle OX",
+    #                     method="restyle",
+    #                     args=[{"visible": ChangeVisibility(fig, "OX", current_visibility, True)}],
+    #                     args2=[{"visible": ChangeVisibility(fig, "OX", current_visibility, False)}],
+    #                 )
+    #             ],
+    #             bgcolor="#0071ae",
+    #             bordercolor="#676767",
+    #             font=dict(color="white"),
+    #             pad=dict(t=10, r=10),
+    #             x=1.15,
+    #             y=1,
+    #         ),
+
+    #         dict(
+    #             type="buttons",
+    #             showactive=False,
+    #             buttons=[
+    #                 dict(
+    #                     label="Toggle FU",
+    #                     method="restyle",
+    #                     args=[{"visible": fu_visibilities}],
+    #                     args2=[{"visible": fu_visibilities_inv}],
+    #                 )
+    #             ],
+    #             bgcolor="#900000",
+    #             bordercolor="#676767",
+    #             font=dict(color="white"),
+    #             pad=dict(t=10, r=10),
+    #             x=1.30,
+    #             y=1,
+    #         ),
+    #     ]
+    # )
 
     if traces_added == 0:
         print("WARNING: No traces were added to the plot!")
@@ -485,6 +780,8 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
 
     fig.update_layout(xaxis=dict(title=X_AXIS_LABEL), hovermode="x unified")
     used_axes.sort(key=lambda a: int(a[1:]) if a[1:].isdigit() else 1)
+
+
 
     step = 0.14 / max(1, len(used_axes) - 1) if len(used_axes) > 1 else 0
     for i, yk in enumerate(used_axes):
@@ -506,7 +803,7 @@ def plot_parquet(parquet_path: str, html_out: str, start: str | None, end: str |
         fig.update_layout(**{k: d})
 
     print(f"Saving plot to {html_out}...")
-    fig.write_html(html_out)
+    export_plot_with_dynamic_buttons(fig, html_out, div_id="my_fig")
     print(f"✓ Plot saved with {traces_added} traces")
 
 
@@ -545,7 +842,7 @@ def main():
         raise SystemExit("input must be .csv or .parquet")
 
     html_out = os.path.join("output", f"{input_file_name}.html")
-    plot_parquet(parquet_path, html_out, args.start, args.end)
+    PlotParquet(parquet_path, html_out, args.start, args.end)
     print(f"\n✓ Complete! Plot saved to: {html_out}")
 
 
