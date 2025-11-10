@@ -1,79 +1,58 @@
-name: Process Data & Publish Plots
+name: Build and Deploy Plot
 
 on:
   push:
-    paths:
-      - "data/**/*.csv"
-      - "data/**/*.parquet"
+    branches: ["main"]
 
 permissions:
-  id-token: write
+  contents: read
   pages: write
-  contents: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Install dependencies
-      run: |
-        pip install numpy pandas plotly pyarrow
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    - name: Make output directory
-      run: mkdir -p output
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install uv
+          uv sync
 
-    - name: Run main.py for changed data files
-      id: generate
-      run: |
-        echo "Changed files:"
-        echo "${{ github.event.head_commit.modified }}"
-        
-        # Detect changed CSV/parquet files
-        changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E "\.csv$|\.parquet$" || true)
+      - name: Run plotter
+        run: |
+          mkdir -p output
+          python main.py data/datadump_11-6-whatisevenhappening.csv
 
-        if [ -z "$changed" ]; then
-          echo "No new data files found."
-          exit 0
-        fi
+      - name: Confirm output contents
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Repo contents:"
+          ls -R .
 
-        echo "$changed" | while read file; do
-          echo "Processing $file ..."
-          python main.py "$file"
-        done
+      - name: Compress HTML files
+        run: |
+          echo "Compressing output/*..."
+          cd output
+          ls -l
+          for f in *.html; do
+            gzip -9 "$f"
+          done
 
-    - name: List output contents
-      run: |
-        echo "Output directory contains:"
-        ls -lh output || echo "output directory missing"
-
-    - name: Compress HTML files (if any)
-      run: |
-        shopt -s nullglob
-        files=(output/*.html)
-
-        if [ ${#files[@]} -eq 0 ]; then
-          echo "No HTML files to compress."
-          exit 0
-        fi
-
-        for f in "${files[@]}"; do
-          echo "Compressing $f ..."
-          gzip -9 "$f"
-          mv "$f.gz" "$f"
-        done
-
-    - name: Upload artifact for Pages
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: output
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output
 
   deploy:
     needs: build
@@ -81,7 +60,8 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
