@@ -1,87 +1,82 @@
-name: Process Data & Publish Plots
+name: Build and Deploy Plot
 
 on:
   push:
     paths:
-      - "data/**/*.csv"
-      - "data/**/*.parquet"
+      - "data/*.csv"
+      - "data/*.parquet"
+      - "main.py"
 
 permissions:
-  id-token: write
-  pages: write
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
 
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
 
-    - name: Install dependencies
+    - name: Install uv
       run: |
-        pip install numpy pandas plotly pyarrow
+        python -m pip install --upgrade pip
+        pip install uv
 
-    - name: Make output directory
+    - name: Install dependencies with uv
+      run: |
+        uv venv
+        .venv/bin/uv pip install -r pyproject.toml
+
+    - name: Ensure output directory exists
       run: mkdir -p output
 
-    - name: Run main.py for changed data files
-      id: generate
+    - name: Detect changed data files
+      id: changed
+      run: |
+        changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
+        echo "changed=$changed" >> $GITHUB_OUTPUT
+
+    - name: Run plot generator on changed files
+      if: ${{ steps.changed.outputs.changed != '' }}
       run: |
         echo "Changed files:"
-        echo "${{ github.event.head_commit.modified }}"
-        
-        # Detect changed CSV/parquet files
-        changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E "\.csv$|\.parquet$" || true)
+        echo ${{ steps.changed.outputs.changed }}
 
-        if [ -z "$changed" ]; then
-          echo "No new data files found."
-          exit 0
-        fi
-
-        echo "$changed" | while read file; do
-          echo "Processing $file ..."
-          python main.py "$file"
+        for file in ${{ steps.changed.outputs.changed }}; do
+          echo "Processing $file"
+          .venv/bin/python main.py "$file"
         done
 
-    - name: List output contents
+    - name: Compress HTML in output/
       run: |
-        echo "Output directory contains:"
-        ls -lh output || echo "output directory missing"
-
-    - name: Compress HTML files (if any)
-      run: |
-        shopt -s nullglob
-        files=(output/*.html)
-
-        if [ ${#files[@]} -eq 0 ]; then
-          echo "No HTML files to compress."
-          exit 0
+        if ls output/*.html 1> /dev/null 2>&1; then
+          gzip -k output/*.html
         fi
 
-        for f in "${files[@]}"; do
-          echo "Compressing $f ..."
-          gzip -9 "$f"
-          mv "$f.gz" "$f"
-        done
-
-    - name: Upload artifact for Pages
-      uses: actions/upload-pages-artifact@v3
+    - name: Upload artifact for GitHub Pages
+      uses: actions/upload-pages-artifact@v2
       with:
-        path: output
+        path: output/
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deploy-pages.outputs.page_url }}
+
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy GitHub Pages
+      id: deploy-pages
+      uses: actions/deploy-pages@v4
