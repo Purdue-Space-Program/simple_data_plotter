@@ -1,0 +1,39 @@
+name: Check for New Data Files
+
+on:
+  push:
+    branches:
+      - "**"   # run on all branches
+
+jobs:
+  detect-new-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get list of changed files
+        id: changes
+        run: |
+          echo "CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Check for new .csv or .parquet files
+        id: check
+        run: |
+          NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true
+
+          if [ -n "$NEW_DATA_FILES" ]; then
+            echo "found=true" >> $GITHUB_ENV
+            echo "New data files detected:"
+            echo "$NEW_DATA_FILES"
+          else
+            echo "found=false" >> $GITHUB_ENV
+            echo "No new data files detected."
+          fi
+
+      - name: Run processing script
+        if: env.found == 'true'
+        run: |
+          echo "Running your data-processing program..."
+          python main.py
