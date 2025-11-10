@@ -580,7 +580,11 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         """Export Plotly HTML with JS that adds dynamic group toggling."""
 
         # Step 1 — save HTML normally
-        fig.write_html(path, include_plotlyjs="cdn", full_html=True, div_id=div_id)
+        fig.write_html(path, 
+                       include_plotlyjs="cdn", 
+                       compress=True,
+                       full_html=True, 
+                       div_id=div_id)
 
         # Step 2 — JavaScript code for real-time group toggle
         js_code = """
