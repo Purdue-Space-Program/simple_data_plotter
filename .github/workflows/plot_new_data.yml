@@ -3,7 +3,7 @@ name: Check for New Data Files
 on:
   push:
     branches:
-      - "**"   # run on all branches
+      - "**"
 
 jobs:
   detect-new-files:
@@ -16,12 +16,14 @@ jobs:
       - name: Get list of changed files
         id: changes
         run: |
-          echo "CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+          CHANGED=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')
+          echo "CHANGED_FILES=$CHANGED" >> $GITHUB_ENV
+          echo "Changed files: $CHANGED"
 
       - name: Check for new .csv or .parquet files
         id: check
         run: |
-          NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true
+          NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true)
 
           if [ -n "$NEW_DATA_FILES" ]; then
             echo "found=true" >> $GITHUB_ENV
@@ -35,5 +37,4 @@ jobs:
       - name: Run processing script
         if: env.found == 'true'
         run: |
-          echo "Running your data-processing program..."
           python main.py
