@@ -17,6 +17,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
+      - name: List output folder
+        run: |
+          echo "Listing output directory:"
+          ls -R output || echo "output directory missing"
+      
+      - name: Debug workspace
+        run: |
+          echo "PWD:"
+          pwd
+          echo "Repo contents:"
+          ls -R .
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
