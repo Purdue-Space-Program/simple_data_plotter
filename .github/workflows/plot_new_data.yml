@@ -13,17 +13,26 @@ jobs:
       - name: Checkout repo with history
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2   # <<< THIS FIXES HEAD~1 ERRORS
+          fetch-depth: 2
 
       - name: Get list of changed files
         id: changes
+        shell: bash
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')
-          echo "CHANGED_FILES=$CHANGED" >> $GITHUB_ENV
-          echo "Changed files: $CHANGED"
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
+          echo "$CHANGED" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "Changed files:"
+          echo "$CHANGED"
 
-      - name: Check for new .csv or .parquet files
+      - name: Detect .csv or .parquet
+        id: detect
+        shell: bash
         run: |
+          echo "Checking CHANGED_FILES="
+          echo "$CHANGED_FILES"
+
           NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true)
 
           if [ -n "$NEW_DATA_FILES" ]; then
