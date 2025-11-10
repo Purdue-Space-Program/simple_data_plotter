@@ -30,10 +30,14 @@ jobs:
         id: detect
         shell: bash
         run: |
-          echo "Checking CHANGED_FILES="
+          echo "Checking CHANGED_FILES:"
           echo "$CHANGED_FILES"
 
           NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true)
+
+          echo "NEW_DATA_FILES<<EOF" >> $GITHUB_ENV
+          echo "$NEW_DATA_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
           if [ -n "$NEW_DATA_FILES" ]; then
             echo "found=true" >> $GITHUB_ENV
@@ -45,16 +49,25 @@ jobs:
           fi
 
       - name: Set up Python
+        if: env.found == 'true'
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
       - name: Install dependencies
+        if: env.found == 'true'
         run: |
           pip install --upgrade pip
           pip install numpy pandas plotly
 
-      - name: Run processing script
+      - name: Run main.py for each new file
         if: env.found == 'true'
+        shell: bash
         run: |
-          python main.py
+          echo "Running main.py for detected files..."
+          echo "$NEW_DATA_FILES" | while read file; do
+            if [ -n "$file" ]; then
+              echo "Processing: $file"
+              python main.py "$file"
+            fi
+          done
