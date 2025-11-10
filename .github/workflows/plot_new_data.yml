@@ -58,7 +58,7 @@ jobs:
         if: env.found == 'true'
         run: |
           pip install --upgrade pip
-          pip install numpy pandas plotly
+          pip install numpy pandas plotly pyarrow
 
       - name: Run main.py for each new file
         if: env.found == 'true'
