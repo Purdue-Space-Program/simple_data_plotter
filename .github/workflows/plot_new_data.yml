@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: List output folder
         run: |
@@ -29,9 +32,6 @@ jobs:
           pwd
           echo "Repo contents:"
           ls -R .
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
