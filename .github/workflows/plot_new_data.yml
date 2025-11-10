@@ -19,6 +19,8 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -36,7 +38,15 @@ jobs:
     - name: Detect changed data files
       id: changed
       run: |
+        # If repository only has one commit, use empty diff
+        if [ "$(git rev-list --count HEAD)" -eq 1 ]; then
+          echo "No parent commit, skipping diff."
+          echo "changed=" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+    
         changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
+        echo "changed=$changed"
         echo "changed=$changed" >> $GITHUB_OUTPUT
 
     - name: Run plot generator on changed files
