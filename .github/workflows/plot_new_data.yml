@@ -10,8 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repo with history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # <<< THIS FIXES HEAD~1 ERRORS
 
       - name: Get list of changed files
         id: changes
@@ -21,7 +23,6 @@ jobs:
           echo "Changed files: $CHANGED"
 
       - name: Check for new .csv or .parquet files
-        id: check
         run: |
           NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true)
 
@@ -37,4 +38,4 @@ jobs:
       - name: Run processing script
         if: env.found == 'true'
         run: |
-          python main.py
+          python your_script.py
