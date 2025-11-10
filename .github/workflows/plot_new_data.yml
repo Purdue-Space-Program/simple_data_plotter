@@ -47,4 +47,4 @@ jobs:
       - name: Run processing script
         if: env.found == 'true'
         run: |
-          python your_script.py
+          python main.py
