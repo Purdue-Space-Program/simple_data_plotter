@@ -62,6 +62,8 @@ else:
         "PI-OX-02",
         "PI-OX-03",
         
+        
+        "PT-FU-06",
         "PT-FU-04",
         "PT-FU-02",
         "PT-FU-201",
@@ -75,10 +77,13 @@ else:
         
         "PI-FU-02",
         "PI-FU-03",
+        "PI-FU-04"
         
         "PT-HE-01",
         "PT-HE-201",
         "TC-HE-201",
+        
+        "SV-N2-02_STATE",
         
         "FMS",
     ]
