@@ -1,100 +1,79 @@
-name: Process Data and Deploy to Pages
+name: Process Data & Publish Plots
 
 on:
   push:
-    branches: [main]
     paths:
-      - "data/*.csv"
-      - "data/*.parquet"
+      - "data/**/*.csv"
+      - "data/**/*.parquet"
 
 permissions:
-  contents: read
-  pages: write
   id-token: write
+  pages: write
+  contents: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v4
 
-      - name: List output folder
-        run: |
-          echo "Listing output directory:"
-          ls -R output || echo "output directory missing"
-      
-      - name: Debug workspace
-        run: |
-          echo "PWD:"
-          pwd
-          echo "Repo contents:"
-          ls -R .
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    - name: Install dependencies
+      run: |
+        pip install numpy pandas plotly pyarrow
 
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt || pip install pandas numpy plotly pyarrow
+    - name: Make output directory
+      run: mkdir -p output
 
-      # -------------------------------------------------------
-      # Detect new data file
-      # -------------------------------------------------------
-      - name: Get changed files
-        id: changes
-        run: |
-          echo "CHANGES=$(git diff --name-only HEAD~1 HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+    - name: Run main.py for changed data files
+      id: generate
+      run: |
+        echo "Changed files:"
+        echo "${{ github.event.head_commit.modified }}"
+        
+        # Detect changed CSV/parquet files
+        changed=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E "\.csv$|\.parquet$" || true)
 
-      - name: Determine new data files
-        id: filter
-        run: |
-          files=$(echo "$CHANGES" | tr ' ' '\n' | grep -E '^data/.*\.(csv|parquet)$' || true)
-          echo "FOUND=$files" >> $GITHUB_ENV
-
-      - name: Show found data files
-        run: |
-          echo "Found data files: $FOUND"
-
-      - name: Exit if nothing new
-        if: env.FOUND == ''
-        run: |
-          echo "No new data files — stopping."
+        if [ -z "$changed" ]; then
+          echo "No new data files found."
           exit 0
+        fi
 
-      # -------------------------------------------------------
-      # Run main.py for each new file
-      # -------------------------------------------------------
-      - name: Run main.py for each new data file
-        run: |
-          for f in $FOUND; do
-            echo "Running main.py on $f..."
-            python main.py "$f"
-          done
+        echo "$changed" | while read file; do
+          echo "Processing $file ..."
+          python main.py "$file"
+        done
 
-      # -------------------------------------------------------
-      # Compress HTML output to allow Pages upload
-      # -------------------------------------------------------
-      - name: Compress HTML files
-        run: |
-          mkdir -p output
-          for f in output/*.html; do
-            echo "Compressing $f..."
-            gzip -9 "$f"
-            mv "$f.gz" "$f"      # keeps .html extension (browsers auto-decompress)
-          done
+    - name: List output contents
+      run: |
+        echo "Output directory contains:"
+        ls -lh output || echo "output directory missing"
 
-      # -------------------------------------------------------
-      # Upload to Pages artifact
-      # -------------------------------------------------------
-      - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: output
+    - name: Compress HTML files (if any)
+      run: |
+        shopt -s nullglob
+        files=(output/*.html)
+
+        if [ ${#files[@]} -eq 0 ]; then
+          echo "No HTML files to compress."
+          exit 0
+        fi
+
+        for f in "${files[@]}"; do
+          echo "Compressing $f ..."
+          gzip -9 "$f"
+          mv "$f.gz" "$f"
+        done
+
+    - name: Upload artifact for Pages
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: output
 
   deploy:
     needs: build
@@ -102,8 +81,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v2
