@@ -582,7 +582,6 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         # Step 1 — save HTML normally
         fig.write_html(path, 
                        include_plotlyjs="cdn", 
-                       compress=True,
                        full_html=True, 
                        div_id=div_id)
 

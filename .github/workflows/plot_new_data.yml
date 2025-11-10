@@ -1,73 +1,65 @@
-name: Check for New Data Files
+name: Process New Data and Deploy Pages
 
 on:
   push:
-    branches:
-      - "**"
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  detect-new-files:
+
+  process-data:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo with history
+      - name: Checkout repository history
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
-
-      - name: Get list of changed files
-        id: changes
-        shell: bash
-        run: |
-          CHANGED=$(git diff --name-only HEAD~1 HEAD)
-          echo "CHANGED_FILES<<EOF" >> $GITHUB_ENV
-          echo "$CHANGED" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "Changed files:"
-          echo "$CHANGED"
-
-      - name: Detect .csv or .parquet
-        id: detect
-        shell: bash
-        run: |
-          echo "Checking CHANGED_FILES:"
-          echo "$CHANGED_FILES"
-
-          NEW_DATA_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(csv|parquet)$' || true)
-
-          echo "NEW_DATA_FILES<<EOF" >> $GITHUB_ENV
-          echo "$NEW_DATA_FILES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-          if [ -n "$NEW_DATA_FILES" ]; then
-            echo "found=true" >> $GITHUB_ENV
-            echo "New data files detected:"
-            echo "$NEW_DATA_FILES"
-          else
-            echo "found=false" >> $GITHUB_ENV
-            echo "No new data files detected."
-          fi
+          fetch-depth: 2   # required to detect changed files
 
       - name: Set up Python
-        if: env.found == 'true'
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install dependencies
-        if: env.found == 'true'
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install numpy pandas plotly pyarrow
 
-      - name: Run main.py for each new file
-        if: env.found == 'true'
-        shell: bash
+      - name: Detect new CSV/parquet files
+        id: detect
         run: |
-          echo "Running main.py for detected files..."
-          echo "$NEW_DATA_FILES" | while read file; do
-            if [ -n "$file" ]; then
-              echo "Processing: $file"
-              python main.py "$file"
-            fi
+          echo "Changed files:"
+          git diff --name-only HEAD~1 HEAD || true
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD || true)
+          DATA_FILES=$(echo "$CHANGED" | grep -E '\.(csv|parquet)$' || true)
+
+          echo "Detected data files: $DATA_FILES"
+          echo "data_files=$DATA_FILES" >> $GITHUB_OUTPUT
+
+      - name: Run main.py on new data
+        if: ${{ steps.detect.outputs.data_files != '' }}
+        run: |
+          mkdir -p output
+          for f in ${{ steps.detect.outputs.data_files }}; do
+            echo "Processing $f"
+            python main.py "$f"
           done
+
+      - name: Upload output folder as Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./output
+
+  deploy:
+    needs: process-data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
