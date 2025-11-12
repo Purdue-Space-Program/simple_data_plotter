@@ -35,20 +35,25 @@ jobs:
     - name: Ensure output directory exists
       run: mkdir -p output
 
+    
     - name: Detect changed data files
       id: changed
       run: |
-        # If repository only has one commit, use empty diff
+        # Handle first-commit edge case
         if [ "$(git rev-list --count HEAD)" -eq 1 ]; then
           echo "No parent commit, skipping diff."
           echo "changed=" >> $GITHUB_OUTPUT
           exit 0
         fi
-    
+  
         changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
-        echo "changed=$changed"
+        changed=$(echo "$changed" | tr '\n' ' ')  # 👈 convert newlines to spaces
+    
+        echo "Changed files: $changed"
         echo "changed=$changed" >> $GITHUB_OUTPUT
 
+
+    
     - name: Run plot generator on changed files
       if: ${{ steps.changed.outputs.changed != '' }}
       run: |
