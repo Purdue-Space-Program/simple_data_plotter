@@ -52,11 +52,11 @@ jobs:
     - name: Run plot generator on changed files
       if: ${{ steps.changed.outputs.changed != '' }}
       run: |
-        echo "Changed files:"
+        echo "Detected changed files:"
         echo ${{ steps.changed.outputs.changed }}
 
         for file in ${{ steps.changed.outputs.changed }}; do
-          echo "Processing $file"
+          echo "Plotting $file"
           python main.py "$file"
         done
 

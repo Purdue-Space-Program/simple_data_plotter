@@ -84,6 +84,7 @@ else:
         "TC-HE-201",
         
         "SV-N2-02_STATE",
+        "SV-N2-02",
         
         "FMS",
     ]
@@ -191,12 +192,19 @@ DEV5_CHANNELS = [
 ]
 
 DEV6_CHANNELS = [
-    "TC-FU-BOTTOM", 
-    "TC-OX-202", 
+    "PV-FU-04", 
+    "SV-N2-02", 
+    "SV-N2-03", 
     "TC-FU-202", 
-    "TC-FU-UPPER", 
-    "PT-CHAMBER",
+    "TC-OX-202", 
+    "TC-FU-VENT", 
+    "PT-FU-06" 
+    "PT-CHAMBER", 
+    "TC-BATTERY", 
+    "HS_CAMERA", 
 ]
+
+
 
 channels = [
     [DEV5_CHANNELS, DEV5_TIME], 
@@ -205,7 +213,7 @@ channels = [
 
 
 def DirectPairs(csv_columns):
-    # print("\nDirectPairs")
+    print("\nDirectPairs")
     
     pairs = {}
     
@@ -245,7 +253,7 @@ def DirectPairs(csv_columns):
 
 
 def MakePIPairs(csv_columns):
-    # print("\nMakePIPairs")
+    print("\nMakePIPairs")
     
     pairs = {}
     
@@ -286,7 +294,7 @@ def MakePIPairs(csv_columns):
 
 
 def BCLSPairs(csv_columns):
-    # print("\nBCLSPairs")
+    print("\nBCLSPairs")
     
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
 
@@ -817,7 +825,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
     
-    DEFAULT_PATH = "data/datadump_11-6-whatisevenhappening.csv"
+    DEFAULT_PATH = "data/reduced_11-9-Hotfire-Attempts_new.parquet"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()
