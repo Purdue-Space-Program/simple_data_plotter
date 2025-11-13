@@ -90,6 +90,28 @@ jobs:
         git push origin HEAD:main
 
 
+        - name: Generate index.html for GitHub Pages
+        run: |
+          echo "<html><head><title>Simple Data Plotter - Index</title></head><body>" > output/index.html
+          echo "<h1>da plots</h1>" >> output/index.html
+          echo "<p>plots:</p><ul>" >> output/index.html
+      
+          # Loop through only *.html (exclude index itself)
+          shopt -s nullglob
+          for file in output/*.html; do
+            fname=$(basename "$file")
+      
+            # skip index.html itself
+            if [ "$fname" != "index.html" ]; then
+              echo "<li><a href='$fname'>$fname</a></li>" >> output/index.html
+            fi
+          done
+      
+          echo "</ul></body></html>" >> output/index.html
+
+
+
+
     - name: Upload artifact for GitHub Pages
       uses: actions/upload-pages-artifact@v3
       with:
