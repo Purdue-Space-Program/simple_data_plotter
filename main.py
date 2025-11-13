@@ -746,13 +746,13 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
             const lbl = document.createElement("label");
             lbl.htmlFor = "themeToggle";
-            lbl.innerText = "🌞 / 🌙";
+            lbl.innerText = "🌞/🌙";
             lbl.style.position = "fixed";
             lbl.style.top = "12px";
             lbl.style.left = "40px";
             lbl.style.color = "black";
             lbl.style.fontFamily = "sans-serif";
-            lbl.style.fontSize = "30px";
+            lbl.style.fontSize = "25px";
             lbl.style.cursor = "pointer";
             lbl.style.zIndex = "9999";
 
