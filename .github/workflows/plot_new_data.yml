@@ -1,5 +1,6 @@
 name: Build and Deploy Plot
 
+# Only push when a new file is available or the plotter script has been updated
 on:
   push:
     paths:
@@ -50,9 +51,10 @@ jobs:
         changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
         changed=$(echo "$changed" | tr '\n' ' ')  # 👈 convert newlines to spaces
     
-        echo "Changed files: $changed"
-        echo "changed=$changed" >> $GITHUB_OUTPUT
-
+        echo "Changed files:"
+        echo "$changed" | while read -r file; do
+          echo " - $file"
+        done
 
     
     - name: Run plot generator on changed files
