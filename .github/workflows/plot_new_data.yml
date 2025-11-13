@@ -49,7 +49,7 @@ jobs:
         fi
   
         changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
-        changed=$(echo "$changed" | tr '\n' ' ')  # 👈 convert newlines to spaces
+        changed=$(echo "$changed" | tr '\n' ' ')
     
         echo "Changed files:"
         echo "$changed" | while read -r file; do
