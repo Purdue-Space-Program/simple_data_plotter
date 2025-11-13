@@ -3,7 +3,7 @@ from collections import defaultdict
 import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
 
-THEME = "plotly_dark"
+THEME = "plotly_white"
 MAX_POINTS_PER_TRACE = 50_000
 # MAX_POINTS_PER_TRACE = 5_000
 
@@ -514,7 +514,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         traces_added += 1
         print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
 
-
+    
     
         
     fig.update_layout(
@@ -598,6 +598,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                        full_html=True, 
                        div_id=div_id)
 
+
         # Step 2 — JavaScript code for real-time group toggle
         js_code = """
                 <script>
@@ -661,7 +662,6 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                         return;
                     }
 
-                    // 🚀 UPDATED: 7 buttons
                     const labels = [
                         "Toggle OX",
                         "Toggle FU",
@@ -731,11 +731,69 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 """
 
 
+
+        theme_toggle_js = """
+        <script>
+        (function() {
+            const btn = document.createElement("input");
+            btn.type = "checkbox";
+            btn.id = "themeToggle";
+            btn.style.position = "fixed";
+            btn.style.top = "10px";
+            btn.style.left = "10px";
+            btn.style.zIndex = "9999";
+            btn.title = "Toggle Dark Mode";
+
+            const lbl = document.createElement("label");
+            lbl.htmlFor = "themeToggle";
+            lbl.innerText = "🌞 / 🌙";
+            lbl.style.position = "fixed";
+            lbl.style.top = "12px";
+            lbl.style.left = "40px";
+            lbl.style.color = "black";
+            lbl.style.fontFamily = "sans-serif";
+            lbl.style.fontSize = "30px";
+            lbl.style.cursor = "pointer";
+            lbl.style.zIndex = "9999";
+
+            document.body.appendChild(lbl);
+            document.body.appendChild(btn);
+
+            btn.addEventListener("change", () => {
+                const gd = document.getElementById("my_fig");
+                if (!gd) return;
+
+                const isDark = btn.checked;
+                const newTemplate = isDark ? "plotly_dark" : "plotly_white";
+
+                const layoutUpdate = {
+                    template: newTemplate,
+                    paper_bgcolor: isDark ? "#111" : "#fff",
+                    plot_bgcolor: isDark ? "#111" : "#fff",
+                    font: { color: isDark ? "#eee" : "#000" },
+                };
+
+                console.log("Switching theme to:", newTemplate);
+                Plotly.react(gd, gd.data, { ...gd.layout, ...layoutUpdate });
+
+                // Change page background and label color too
+                document.body.style.backgroundColor = layoutUpdate.paper_bgcolor;
+                lbl.style.color = layoutUpdate.font.color;
+            });
+        })();
+        </script>
+        """
+
+
+
+
+
+
         # Step 3 — append JS before </body>
         with open(path, "r", encoding="utf-8") as f:
             html = f.read()
 
-        html = html.replace("</body>", js_code + "\n</body>")
+        html = html.replace("</body>", js_code + theme_toggle_js + "\n</body>")
 
         # Step 4 — write modified HTML back
         with open(path, "w", encoding="utf-8") as f:
