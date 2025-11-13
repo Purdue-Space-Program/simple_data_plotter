@@ -85,7 +85,6 @@ jobs:
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git pull --rebase origin main
 
         # Add and commit any changes in output/
         git add output || echo "No HTML files to add"
