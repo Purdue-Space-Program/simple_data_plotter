@@ -37,7 +37,8 @@ jobs:
     - name: Ensure output directory exists
       run: mkdir -p output
 
-    
+
+      
     - name: Detect changed data files
       id: changed
       run: |
@@ -47,15 +48,18 @@ jobs:
           echo "changed=" >> $GITHUB_OUTPUT
           exit 0
         fi
-  
+    
+        # Get changed CSV or Parquet files (each on its own line)
         changed=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(csv|parquet)$' || true)
-        changed=$(echo "$changed" | tr '\n' ' ')
     
         echo "Changed files:"
-        echo "$changed" | while read -r file; do
+        while IFS= read -r file; do
           echo " - $file"
-        done
-
+        done <<< "$changed"
+    
+        # Convert newlines → spaces *only* for the GitHub output variable
+        changed_space=$(echo "$changed" | tr '\n' ' ')
+        echo "changed=$changed_space" >> $GITHUB_OUTPUT
     
     - name: Run plot generator on changed files
       if: ${{ steps.changed.outputs.changed != '' }}
