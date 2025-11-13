@@ -38,7 +38,7 @@ jobs:
       run: mkdir -p output
 
 
-      
+
     - name: Detect changed data files
       id: changed
       run: |
@@ -62,6 +62,8 @@ jobs:
         echo "changed=$changed_space" >> $GITHUB_OUTPUT
     
     - name: Run plot generator on changed files
+        echo "${{ steps.changed.outputs.changed != '' }}"
+      
       if: ${{ steps.changed.outputs.changed != '' }}
       run: |
         echo "Detected changed files:"
