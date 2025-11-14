@@ -77,7 +77,7 @@ else:
 
         "PI-FU-02",
         "PI-FU-03",
-        "PI-FU-04"
+        "PI-FU-04",
 
         "PT-HE-01",
         "PT-HE-201",
@@ -136,7 +136,7 @@ else:
     def SensorTypeToAxis(name: str) -> str:
         name_upper = name.upper()
 
-        if "PT" in name_upper:
+        if "PT-" in name_upper:
             sensor_axis = "y1"
         elif "PI-" in name_upper:
             sensor_axis = "y2"
@@ -198,7 +198,7 @@ DEV6_CHANNELS = [
     "TC-FU-202",
     "TC-OX-202",
     "TC-FU-VENT",
-    "PT-FU-06"
+    "PT-FU-06",
     "PT-CHAMBER",
     "TC-BATTERY",
     "HS_CAMERA",
@@ -508,7 +508,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 name=sensor.get("name", column),
                 line=dict(color=sensor.get("color")),
                 yaxis=_trace_axis_id(yaxis_key),
-
+                visible=True,
             )
         )
         traces_added += 1
@@ -633,7 +633,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                     const target = groupVis.some(v => v) ? false : true;
 
                     // Build final visibility array
-                    let vis = data.map(t => (t.visible === undefined || t.visible));
+                    let vis = data.map(t => t.visible === "legendonly" ? false : t.visible !== false);
 
                     for (const idx of groupIdx) {
                         vis[idx] = target;
@@ -736,15 +736,27 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
             const graph = document.getElementById('my_fig');
             if (!graph) return;
 
-            graph.on('plotly_restyle', () => {
+            // --- ADD THIS THROTTLE FUNCTION ---
+            function throttle(fn, wait) {
+                let last = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - last >= wait) {
+                        last = now;
+                        fn.apply(this, args);
+                    }
+                };
+            }
+
+            // --- MOVE YOUR HIDE FUNCTION INTO ITS OWN WRAPPER ---
+            function hideUnusedAxes() {
                 const gd = graph._fullLayout;
                 const data = graph.data;
 
-                // Track which axes have visible traces
                 const axesUsed = {};
 
                 data.forEach(trace => {
-                    const isVisible = trace.visible !== 'legendonly';
+                    const isVisible = !(trace.visible === false || trace.visible === "legendonly");
                     const axis = trace.yaxis || 'y';
                     if (isVisible) axesUsed[axis] = true;
                 });
@@ -759,7 +771,10 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 });
 
                 Plotly.relayout(graph, update);
-            });
+            }
+
+            // --- REPLACE YOUR ORIGINAL LISTENER WITH THROTTLED VERSION ---
+            graph.on('plotly_restyle', throttle(hideUnusedAxes, 150));
         });
         </script>
         """
@@ -807,7 +822,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 };
 
                 console.log("Switching theme to:", newTemplate);
-                Plotly.react(gd, gd.data, { ...gd.layout, ...layoutUpdate });
+                Plotly.react(gd, gd.data, Object.assign({}, gd.layout, layoutUpdate));
 
                 // Change page background and label color too
                 document.body.style.backgroundColor = layoutUpdate.paper_bgcolor;
