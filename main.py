@@ -430,9 +430,6 @@ def _thin(x, y, maxn):
     return x.values[idx], y.values[idx]
 
 
-def _layout_axis_key(k):
-    return "yaxis" if k.lower() == "y1" else f"yaxis{int(k[1:])}"
-
 
 # def AssignLegendGroup(sensor_name):
 #     """
@@ -860,23 +857,23 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 
     step = 0.14 / max(1, len(used_axes) - 1) if len(used_axes) > 1 else 0
-    for i, yk in enumerate(used_axes):
-        k = _layout_axis_key(yk)
-        t = Y_AXIS_LABELS.get(yk, yk)
-        if yk == "y1":
-            d = dict(title=dict(text=t), side="left", position=0.0, showgrid=True)
+    for i, y_axis_key in enumerate(used_axes):
+        k = y_axis_key
+        t = Y_AXIS_LABELS.get(y_axis_key, y_axis_key)
+        if y_axis_key == "y1":
+            dict = dict(title=dict(text=t), side="left", position=0.0, showgrid=True)
         else:
             side = "right" if i % 2 else "left"
             pos = (1 - (i // 2) * step) if side == "right" else ((i // 2 + 1) * step)
             pos = max(0.02, min(0.98, pos))
-            d = dict(
+            dict = dict(
                 title=dict(text=t),
                 overlaying="y",
                 side=side,
                 position=pos,
                 showgrid=False,
             )
-        fig.update_layout(**{k: d})
+        fig.update_layout(**{k: dict})
 
     print(f"Saving plot to {html_out}...")
     export_plot_with_dynamic_buttons(fig, html_out, div_id="my_fig")
