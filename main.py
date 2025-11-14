@@ -430,10 +430,6 @@ def _thin(x, y, maxn):
     return x.values[idx], y.values[idx]
 
 
-def _trace_axis_id(k):
-    return "y" if k.lower() == "y1" else k.lower()
-
-
 def _layout_axis_key(k):
     return "yaxis" if k.lower() == "y1" else f"yaxis{int(k[1:])}"
 
@@ -507,7 +503,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 mode="lines",
                 name=sensor.get("name", column),
                 line=dict(color=sensor.get("color")),
-                yaxis=_trace_axis_id(yaxis_key),
+                yaxis=yaxis_key,
                 visible=True,
             )
         )
