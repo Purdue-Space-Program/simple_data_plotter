@@ -760,16 +760,22 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
                 data.forEach(trace => {
                     const isVisible = !(trace.visible === false || trace.visible === "legendonly");
-                    const axis = trace.yaxis || 'y';
+                    // Convert trace.yaxis ("y", "y2", ...) into layout key ("yaxis", "yaxis2", ...)
+                    let axis = trace.yaxis || 'y';
+                    if (axis === 'y') {
+                        axis = 'yaxis';
+                    } else {
+                        axis = axis.replace('y', 'yaxis');
+                    }
+
                     if (isVisible) axesUsed[axis] = true;
                 });
 
                 const update = {};
 
-            ['y', 'y2', 'y3', 'y4', 'y5', 'y6'].forEach(axis => {
-                const key = (axis === 'y') ? 'yaxis' : `yaxis${axis.slice(1)}`;
+            ['yaxis', 'yaxis2', 'yaxis3', 'yaxis4', 'yaxis5'].forEach(key => {
                 if (gd[key]) {
-                    update[key + '.visible'] = !!axesUsed[axis];
+                    update[key + '.visible'] = !!axesUsed[key];
                 }
             });
 
