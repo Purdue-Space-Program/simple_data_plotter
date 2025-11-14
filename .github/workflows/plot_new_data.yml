@@ -96,16 +96,17 @@ jobs:
 
     - name: Generate index.html for GitHub Pages
       run: |
-        echo "<html><head><title>Simple Data Plotter - Index</title></head><body>" > output/index.html
+        echo "<html><head><title>Simple Data Plotter - Index</title></head><body>" > index.html
         echo "<h1>da plots</h1>" >> index.html
         echo "<p>plots:</p><ul>" >> index.html
 
         # Loop through only *.html (exclude index itself)
         shopt -s nullglob
         for file in output/*.html; do
-          fname=$(basename "$file")
-          echo "<li><a href='output/$fname'>$fname</a></li>" >> index.html
-
+          file_name=$(basename "$file")
+          if [ "$file_name" != "index.html" ]; then
+            echo "<li><a href='output/$file_name'>$file_name</a></li>" >> index.html
+          fi
         done
 
         echo "</ul>" >> index.html
