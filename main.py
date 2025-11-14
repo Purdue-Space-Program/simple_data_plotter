@@ -52,40 +52,40 @@ else:
         "PT-OX-04",
         "PT-OX-201",
         "PT-OX-202",
-        
+
         "TC-OX-02",
         "TC-OX-04",
         "TC-OX-202",
         "TC-OX-201",
         "RTD-OX",
-        
+
         "PI-OX-02",
         "PI-OX-03",
-        
-        
+
+
         "PT-FU-06",
         "PT-FU-04",
         "PT-FU-02",
         "PT-FU-201",
         "PT-FU-202",
-        
+
         "TC-FU-04",
         "TC-FU-02",
         "TC-FU-202",
         "TC-FU-201",
-        "RTD-FU", 
-        
+        "RTD-FU",
+
         "PI-FU-02",
         "PI-FU-03",
         "PI-FU-04"
-        
+
         "PT-HE-01",
         "PT-HE-201",
         "TC-HE-201",
-        
+
         "SV-N2-02_STATE",
         "SV-N2-02",
-        
+
         "FMS",
     ]
 
@@ -130,7 +130,7 @@ else:
             sensor_color = "#DCEB0E"
         else:
             sensor_color = "#000000"
-        
+
         return(sensor_color)
 
     def SensorTypeToAxis(name: str) -> str:
@@ -192,36 +192,36 @@ DEV5_CHANNELS = [
 ]
 
 DEV6_CHANNELS = [
-    "PV-FU-04", 
-    "SV-N2-02", 
-    "SV-N2-03", 
-    "TC-FU-202", 
-    "TC-OX-202", 
-    "TC-FU-VENT", 
-    "PT-FU-06" 
-    "PT-CHAMBER", 
-    "TC-BATTERY", 
-    "HS_CAMERA", 
+    "PV-FU-04",
+    "SV-N2-02",
+    "SV-N2-03",
+    "TC-FU-202",
+    "TC-OX-202",
+    "TC-FU-VENT",
+    "PT-FU-06"
+    "PT-CHAMBER",
+    "TC-BATTERY",
+    "HS_CAMERA",
 ]
 
 
 
 channels = [
-    [DEV5_CHANNELS, DEV5_TIME], 
+    [DEV5_CHANNELS, DEV5_TIME],
     [DEV6_CHANNELS, DEV6_TIME]
     ]
 
 
 def DirectPairs(csv_columns):
     print("\nDirectPairs")
-    
+
     pairs = {}
-    
-    for csv_column in csv_columns:        
-        
+
+    for csv_column in csv_columns:
+
         if csv_column.lower().endswith("_time"):
             sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
-            
+
             for channel, time in channels:
                 # check if it is time
                 # if (csv_column in (c[1] for c in channels)):
@@ -248,60 +248,60 @@ def DirectPairs(csv_columns):
 
     # print (f"\n{pairs}\n")
     # ##### compare with old version
-    
+
     return pairs
 
 
 def MakePIPairs(csv_columns):
     print("\nMakePIPairs")
-    
+
     pairs = {}
-    
+
     for csv_column in csv_columns:
         m = re.match(r"^BCLS_di_time_(.+)$", csv_column)
-        
+
         if m != None:
             sensor_name = m.group(1)
             if sensor_name in SENSORS_TO_PLOT_NAMES:
-            
+
                 if (m and sensor_name in csv_columns):
 
                         pairs[csv_column] = [m.group(1)]
-                        
-                        
+
+
             else:
                 print(f"Warning: Column '{csv_column}' not found; skipping.")
 
 
     # ######### compare with old version
     # print(f"\n{pairs}")
-    # pairs = None        
-        
+    # pairs = None
+
     # pairs = defaultdict(list)
-    
+
     # for csv_column in csv_columns:
     #     # if csv_column == "BCLS_di_time_PI-OX-02":
     #     #     pass
     #     m = re.match(r"^BCLS_di_time_(.+)$", csv_column)
     #     if m and m.group(1) in csv_columns:
     #         pairs[csv_column].append(m.group(1))
-            
+
 
     # print(f"\n{pairs}\n")
     # ######### compare with old version
-    
+
     return pairs
 
 
 def BCLSPairs(csv_columns):
     print("\nBCLSPairs")
-    
+
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
 
     for channel, time in channels:
         if time in csv_columns:
             for sensor_name in channel:
-                
+
                 if sensor_name in csv_columns:
                     if (sensor_name in SENSORS_TO_PLOT_NAMES):
                         pairs[time].append(sensor_name)
@@ -314,10 +314,10 @@ def BCLSPairs(csv_columns):
 
     # ############ compare with old version
     # print(f"\n{pairs}")
-    # pairs = None                
-            
+    # pairs = None
+
     # pairs = defaultdict(list)
-    
+
     # if DEV5_TIME in csv_columns:
     #     for ch in DEV5_CHANNELS:
     #         if ch in csv_columns:
@@ -410,7 +410,7 @@ def ConvertCSVToParquet(input_csv: str) -> str:
     # Save to parquet
     base = os.path.splitext(input_csv)[0]
     parquet_path = f"{base}.parquet"
-    
+
     print(f"Saving to {parquet_path}...")
     combined.to_parquet(parquet_path, index=False, engine="pyarrow")
 
@@ -423,7 +423,7 @@ def ConvertCSVToParquet(input_csv: str) -> str:
 def _thin(x, y, maxn):
     if maxn is None:
         raise ValueError
-    
+
     if len(y) <= maxn:
         return x.values, y.values
     idx = np.linspace(0, len(y) - 1, maxn, dtype=int)
@@ -462,7 +462,7 @@ def _layout_axis_key(k):
     #         else:
     #             new_visibility.append(current_visibility[index])
 
-    #     return new_visibility    
+    #     return new_visibility
 
 
 
@@ -508,15 +508,15 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 name=sensor.get("name", column),
                 line=dict(color=sensor.get("color")),
                 yaxis=_trace_axis_id(yaxis_key),
-     
+
             )
         )
         traces_added += 1
         print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
 
-    
-    
-        
+
+
+
     fig.update_layout(
         updatemenus=[
             dict(
@@ -593,9 +593,9 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         """Export Plotly HTML with JS that adds dynamic group toggling."""
 
         # Step 1 — save HTML normally
-        fig.write_html(path, 
-                       include_plotlyjs="cdn", 
-                       full_html=True, 
+        fig.write_html(path,
+                       include_plotlyjs="cdn",
+                       full_html=True,
                        div_id=div_id)
 
 
@@ -730,6 +730,39 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 </script>
                 """
 
+        hide_unused_axis_js = """
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const graph = document.getElementById('my_fig');
+            if (!graph) return;
+
+            graph.on('plotly_restyle', () => {
+                const gd = graph._fullLayout;
+                const data = graph.data;
+
+                // Track which axes have visible traces
+                const axesUsed = {};
+
+                data.forEach(trace => {
+                    const isVisible = trace.visible !== 'legendonly';
+                    const axis = trace.yaxis || 'y';
+                    if (isVisible) axesUsed[axis] = true;
+                });
+
+                const update = {};
+
+                ['y', 'y2', 'y3', 'y4', 'y5'].forEach(axis => {
+                    const key = axis + 'axis';
+                    if (gd[key]) {
+                        update[key + '.visible'] = !!axesUsed[axis];
+                    }
+                });
+
+                Plotly.relayout(graph, update);
+            });
+        });
+        </script>
+        """
 
 
         theme_toggle_js = """
@@ -785,67 +818,16 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         """
 
 
-
-
-
-
         # Step 3 — append JS before </body>
         with open(path, "r", encoding="utf-8") as f:
             html = f.read()
 
-        html = html.replace("</body>", js_code + theme_toggle_js + "\n</body>")
+        html = html.replace("</body>", js_code + theme_toggle_js + hide_unused_axis_js + "\n</body>")
 
         # Step 4 — write modified HTML back
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
 
-
-
-
-    # fig.update_layout(
-        
-    #     current_visibility = [trace.visible for trace in fig.data]
-
-    #     updatemenus=[
-    #         dict(
-    #             type="buttons",
-    #             showactive=False,
-    #             buttons=[
-    #                 dict(
-    #                     label="Toggle OX",
-    #                     method="restyle",
-    #                     args=[{"visible": ChangeVisibility(fig, "OX", current_visibility, True)}],
-    #                     args2=[{"visible": ChangeVisibility(fig, "OX", current_visibility, False)}],
-    #                 )
-    #             ],
-    #             bgcolor="#0071ae",
-    #             bordercolor="#676767",
-    #             font=dict(color="white"),
-    #             pad=dict(t=10, r=10),
-    #             x=1.15,
-    #             y=1,
-    #         ),
-
-    #         dict(
-    #             type="buttons",
-    #             showactive=False,
-    #             buttons=[
-    #                 dict(
-    #                     label="Toggle FU",
-    #                     method="restyle",
-    #                     args=[{"visible": fu_visibilities}],
-    #                     args2=[{"visible": fu_visibilities_inv}],
-    #                 )
-    #             ],
-    #             bgcolor="#900000",
-    #             bordercolor="#676767",
-    #             font=dict(color="white"),
-    #             pad=dict(t=10, r=10),
-    #             x=1.30,
-    #             y=1,
-    #         ),
-    #     ]
-    # )
 
     if traces_added == 0:
         print("WARNING: No traces were added to the plot!")
@@ -882,7 +864,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 
 def main():
-    
+
     DEFAULT_PATH = "data/reduced_11-9-Hotfire-Attempts_new.parquet"
     _SENTINEL = object()
 
