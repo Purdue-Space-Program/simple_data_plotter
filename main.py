@@ -163,7 +163,7 @@ X_AXIS_LABEL = "Time [H:M:S:milliseconds]"
 Y_AXIS_LABELS = {
     "y1": "Pressure [psia]",
     "y2": "Position Indicator [0/1]",
-    "y3": "Fuel Temperature [°K]",
+    "y3": "Temperature [°K]",
     "y4": "RTD Voltage (V)",
     "y5": "Mass (lbf)",
     "y6": "unknown sensor",
@@ -508,16 +508,28 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
 
 
-
-
     fig.update_layout(
 
         yaxis=dict(title="Pressure [psia]", visible=True),
-        yaxis2=dict(title="Position Indicator [0/1]", overlaying="y", side="right", visible=False),
-        yaxis3=dict(title="Fuel Temperature [°K]", anchor="free", overlaying="y", side="right", position=0.95, visible=False),
-        yaxis4=dict(title="RTD Voltage (V)", anchor="free", overlaying="y", side="right", position=0.90, visible=False),
-        yaxis5=dict(title="Mass (lbf)", anchor="free", overlaying="y", side="right", position=0.85, visible=False),
 
+        yaxis2=dict(title="Position Indicator [0/1]",
+                    overlaying="y", side="right",
+                    visible=True),
+
+        yaxis3=dict(title="Temperature [°K]",
+                    anchor="free", overlaying="y",
+                    side="right", position=0.95,
+                    visible=True),
+
+        yaxis4=dict(title="RTD Voltage (V)",
+                    anchor="free", overlaying="y",
+                    side="right", position=0.90,
+                    visible=True),
+
+        yaxis5=dict(title="Mass (lbf)",
+                    anchor="free", overlaying="y",
+                    side="right", position=0.85,
+                    visible=True),
 
 
         updatemenus=[
