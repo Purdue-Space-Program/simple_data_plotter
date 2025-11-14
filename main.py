@@ -766,12 +766,12 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
                 const update = {};
 
-                ['y', 'y2', 'y3', 'y4', 'y5', 'y6'].forEach(axis => {
-                    const key = axis + 'axis';
-                    if (gd[key]) {
-                        update[key + '.visible'] = !!axesUsed[axis];
-                    }
-                });
+            ['y', 'y2', 'y3', 'y4', 'y5', 'y6'].forEach(axis => {
+                const key = (axis === 'y') ? 'yaxis' : `yaxis${axis.slice(1)}`;
+                if (gd[key]) {
+                    update[key + '.visible'] = !!axesUsed[axis];
+                }
+            });
 
                 Plotly.relayout(graph, update);
             }
