@@ -588,7 +588,8 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         ]
     )
 
-
+    def _layout_axis_key(k):
+        return "yaxis" if k.lower() == "y1" else f"yaxis{int(k[1:])}"
 
 
     def export_plot_with_dynamic_buttons(fig, path, div_id="my_fig"):
@@ -854,11 +855,10 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
     fig.update_layout(xaxis=dict(title=X_AXIS_LABEL), hovermode="x unified")
     used_axes.sort(key=lambda a: int(a[1:]) if a[1:].isdigit() else 1)
 
-
-
     step = 0.14 / max(1, len(used_axes) - 1) if len(used_axes) > 1 else 0
+
     for i, y_axis_key in enumerate(used_axes):
-        k = y_axis_key
+
         y_axis_label = Y_AXIS_LABELS.get(y_axis_key, y_axis_key)
         if y_axis_key == "y1":
             dictionary = dict(title=dict(text=y_axis_label),
@@ -876,7 +876,9 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 position=pos,
                 showgrid=False,
             )
-        fig.update_layout(**{k: dictionary})
+
+        layout_key = _layout_axis_key(y_axis_key)
+        fig.update_layout(**{layout_key: dictionary})
 
     print(f"Saving plot to {html_out}...")
     export_plot_with_dynamic_buttons(fig, html_out, div_id="my_fig")
