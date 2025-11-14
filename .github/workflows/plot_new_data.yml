@@ -97,37 +97,35 @@ jobs:
     - name: Generate index.html for GitHub Pages
       run: |
         echo "<html><head><title>Simple Data Plotter - Index</title></head><body>" > output/index.html
-        echo "<h1>da plots</h1>" >> output/index.html
-        echo "<p>plots:</p><ul>" >> output/index.html
+        echo "<h1>da plots</h1>" >> index.html
+        echo "<p>plots:</p><ul>" >> index.html
 
         # Loop through only *.html (exclude index itself)
         shopt -s nullglob
         for file in output/*.html; do
           fname=$(basename "$file")
+          echo "<li><a href='output/$fname'>$fname</a></li>" >> index.html
 
-          if [ "$fname" != "index.html" ]; then
-            echo "<li><a href='$fname'>$fname</a></li>" >> output/index.html
-          fi
         done
 
-        echo "</ul>" >> output/index.html
+        echo "</ul>" >> index.html
 
         # ---- PDF viewer embed ----
         if [ -f PSPL_CMS_MASTER_11012025.pdf ]; then
-          echo "<h2>CMS Master P&ID</h2>" >> output/index.html
-          echo "<iframe src='PSPL_CMS_MASTER_11012025.pdf' width='100%' height='800px'></iframe>" >> output/index.html
+          echo "<h2>CMS Master P&ID</h2>" >> index.html
+          echo "<iframe src='PSPL_CMS_MASTER_11012025.pdf' width='100%' height='800px'></iframe>" >> index.html
         else
-          echo "<p>No PDF found.</p>" >> output/index.html
+          echo "<p>No PDF found.</p>" >> index.html
         fi
         # --------------------------
 
-        echo "</body></html>" >> output/index.html
+        echo "</body></html>" >> index.html
 
 
     - name: Upload artifact for GitHub Pages
       uses: actions/upload-pages-artifact@v3
       with:
-        path: output/
+        path: .
 
   deploy:
     needs: build
