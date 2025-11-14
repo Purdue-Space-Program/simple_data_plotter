@@ -105,14 +105,23 @@ jobs:
         for file in output/*.html; do
           fname=$(basename "$file")
 
-          # skip index.html itself
           if [ "$fname" != "index.html" ]; then
             echo "<li><a href='$fname'>$fname</a></li>" >> output/index.html
           fi
         done
 
-        echo "</ul></body></html>" >> output/index.html
+        echo "</ul>" >> output/index.html
 
+        # ---- PDF viewer embed ----
+        if [ -f PSPL_CMS_MASTER_11012025.pdf ]; then
+          echo "<h2>CMS Master P&ID</h2>" >> output/index.html
+          echo "<iframe src='PSPL_CMS_MASTER_11012025.pdf' width='100%' height='800px'></iframe>" >> output/index.html
+        else
+          echo "<p>No PDF found.</p>" >> output/index.html
+        fi
+        # --------------------------
+
+        echo "</body></html>" >> output/index.html
 
 
     - name: Upload artifact for GitHub Pages
