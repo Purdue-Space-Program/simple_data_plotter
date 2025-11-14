@@ -518,6 +518,15 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 
     fig.update_layout(
+
+        yaxis=dict(title="Pressure [psia]", visible=True),
+        yaxis2=dict(title="Position Indicator [0/1]", overlaying="y", side="right", visible=False),
+        yaxis3=dict(title="Fuel Temperature [°K]", anchor="free", overlaying="y", side="right", position=0.95, visible=False),
+        yaxis4=dict(title="RTD Voltage (V)", anchor="free", overlaying="y", side="right", position=0.90, visible=False),
+        yaxis5=dict(title="Mass (lbf)", anchor="free", overlaying="y", side="right", position=0.85, visible=False),
+
+
+
         updatemenus=[
             dict(
                 type="buttons",
@@ -763,7 +772,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
                 const update = {};
 
-                ['y', 'y2', 'y3', 'y4', 'y5'].forEach(axis => {
+                ['y', 'y2', 'y3', 'y4', 'y5', 'y6'].forEach(axis => {
                     const key = axis + 'axis';
                     if (gd[key]) {
                         update[key + '.visible'] = !!axesUsed[axis];
