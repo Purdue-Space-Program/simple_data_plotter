@@ -183,11 +183,11 @@ else:
                         max_blue = 150
                     elif fluid_name == "HE":
                         min_red = 0
-                        max_red = 120
+                        max_red = 100
                         min_green = 100
                         max_green = 255
                         min_blue = 0
-                        max_blue = 120
+                        max_blue = 200
                     elif fluid_name == "N2":
                         min_red = 150
                         max_red = 255
@@ -203,10 +203,10 @@ else:
                         min_blue = 180
                         max_blue = 255
                     
-                    current_to_total_sensors_colored = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
-                    red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored))
-                    green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored))
-                    blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored))
+                    current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
+                    red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
+                    green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
+                    blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
                 
                     sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
 
@@ -942,13 +942,104 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         })();
         </script>
         """
+        
+        
+        
+        color_picker_js = """
+        <script>
+        (function(){
+            const gd = document.getElementById("my_fig");
+            if (!gd) return;
+
+            const themeToggle = document.getElementById("themeToggle");
+
+            // Create panel
+            let panel = document.getElementById("color-panel");
+            if (!panel) {
+                panel = document.createElement("div");
+                panel.id = "color-panel";
+                panel.style.position = "fixed";
+                panel.style.top = "10px";
+                panel.style.right = "10px";
+                panel.style.padding = "10px";
+                panel.style.maxHeight = "90vh";
+                panel.style.overflowY = "auto";
+                panel.style.zIndex = "9999";
+                panel.style.fontFamily = "sans-serif";
+                panel.style.fontSize = "13px";
+                document.body.appendChild(panel);
+            }
+
+            function updatePanelColors() {
+                const isDark = themeToggle && themeToggle.checked;
+                panel.style.background = isDark ? "#111" : "#fff";
+                panel.style.color = isDark ? "#eee" : "#000";
+                panel.style.border = `1px solid ${isDark ? "#555" : "#ccc"}`;
+            }
+
+            function buildColorPickers() {
+                updatePanelColors();
+                panel.innerHTML = "<b>Trace Colors</b><br>";
+
+                gd.data.forEach((trace, i) => {
+                    const isVisible = trace.visible !== false && trace.visible !== "legendonly";
+                    if (!isVisible) return;
+
+                    const row = document.createElement("div");
+                    row.style.marginBottom = "5px";
+                    row.style.display = "flex";
+                    row.style.alignItems = "center";
+
+                    const label = document.createElement("span");
+                    label.textContent = trace.name;
+                    label.style.marginRight = "5px";
+                    label.style.flex = "1";
+
+                    const input = document.createElement("input");
+                    input.type = "color";
+                    input.value = trace.line.color || "#757575";
+                    input.title = "Change trace color";
+
+                    input.style.border = themeToggle && themeToggle.checked ? "1px solid #eee" : "1px solid #000";
+
+                    input.addEventListener("input", () => {
+                        Plotly.restyle(gd, {"line.color": input.value}, [i]);
+                    });
+
+                    row.appendChild(label);
+                    row.appendChild(input);
+                    panel.appendChild(row);
+                });
+
+                // Adjust Plotly layout margins to make room for the panel
+                const panelWidth = panel.offsetWidth + 33; // extra 20px padding
+                Plotly.relayout(gd, {margin: {r: panelWidth}});
+            }
+
+            // Build initially
+            buildColorPickers();
+
+            // Update panel after any restyle
+            gd.on('plotly_restyle', () => setTimeout(buildColorPickers, 50));
+
+            // Update panel colors and adjust margins when theme toggled
+            if (themeToggle) {
+                themeToggle.addEventListener("change", () => setTimeout(buildColorPickers, 50));
+            }
+
+            // Optional: update on window resize so panel doesn't overlap
+            window.addEventListener("resize", () => setTimeout(buildColorPickers, 50));
+        })();
+        </script>
+        """
+
 
 
         # Step 3 — append JS before </body>
         with open(path, "r", encoding="utf-8") as f:
             html = f.read()
 
-        html = html.replace("</body>", js_code + theme_toggle_js + hide_unused_axis_js + "\n</body>")
+        html = html.replace("</body>", js_code + theme_toggle_js + hide_unused_axis_js + color_picker_js + "\n</body>")
 
         # Step 4 — write modified HTML back
         with open(path, "w", encoding="utf-8") as f:
