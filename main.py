@@ -4,8 +4,8 @@ import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
 
 THEME = "plotly_white"
+# MAX_POINTS_PER_TRACE = 1_000_000
 MAX_POINTS_PER_TRACE = 50_000
-# MAX_POINTS_PER_TRACE = 5_000
 
 
 use_davids_auto_sensors = True
@@ -62,7 +62,6 @@ else:
         "PI-OX-02",
         "PI-OX-03",
 
-
         "PT-FU-06",
         "PT-FU-04",
         "PT-FU-02",
@@ -89,49 +88,140 @@ else:
         "FMS",
     ]
 
+    total_number_fluid_sensors = {
+        "OX": 0,
+        "FU": 0,
+        "HE": 0,
+        "N2": 0,
+        "WA": 0,   
+    }
+    
+    current_number_fluid_sensors_already_colored = {
+        "OX": 0,
+        "FU": 0,
+        "HE": 0,
+        "N2": 0,
+        "WA": 0,   
+    }
+    
+    for sensor_name in SENSORS_TO_PLOT_NAMES:
+        name_upper = sensor_name.upper()
+        
+        for fluid_name in total_number_fluid_sensors.keys():
+            
+            if f"-{fluid_name}" in name_upper:
+                total_number_fluid_sensors[fluid_name] += 1
+                
+                
 
-    def FluidNameToColor(name: str) -> str:
-        name_upper = name.upper()
+    def FluidNameToColor(sensor_name, current_number_fluid_sensors_already_colored):
+        sensor_name_upper = sensor_name.upper()
 
-        if "-OX" in name_upper:
-            # sensor_color = "#3EABFF"
-            # Random shade of blue
-            r = random.randint(0, 100)
-            g = random.randint(100, 200)
-            b = random.randint(200, 255)
-            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-        elif "-FU" in name_upper:
-            # sensor_color = "#6D0000"
-            # Random shade of red
-            r = random.randint(200, 255)
-            g = random.randint(50, 150)
-            b = random.randint(0, 100)
-            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-        elif "-HE" in name_upper:
-            # sensor_color = "#6D0000"
-            # Random shade of green
-            r = random.randint(0, 100)
-            g = random.randint(200, 255)
-            b = random.randint(0, 100)
-            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-        elif "-N2" in name_upper:
-            # Random shade of purple
-            r = random.randint(200, 255)
-            g = random.randint(0, 100)
-            b = random.randint(200, 255)
-            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-        elif "-WA" in name_upper:
-            # Random shade of blue
-            r = random.randint(0, 100)
-            g = random.randint(100, 200)
-            b = random.randint(200, 255)
-            sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-        elif "FMS" in name_upper:
-            sensor_color = "#DCEB0E"
+        color_selection = "nah"
+        
+        if color_selection == "random":
+
+            if "-OX" in sensor_name_upper:
+                # sensor_color = "#3EABFF"
+                # Random shade of blue
+                r = random.randint(0, 100)
+                g = random.randint(100, 200)
+                b = random.randint(200, 255)
+                sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+            elif "-FU" in sensor_name_upper:
+                # sensor_color = "#6D0000"
+                # Random shade of red
+                r = random.randint(200, 255)
+                g = random.randint(50, 150)
+                b = random.randint(0, 100)
+                sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+            elif "-HE" in sensor_name_upper:
+                # sensor_color = "#6D0000"
+                # Random shade of green
+                r = random.randint(0, 100)
+                g = random.randint(200, 255)
+                b = random.randint(0, 100)
+                sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+            elif "-N2" in sensor_name_upper:
+                # Random shade of purple
+                r = random.randint(200, 255)
+                g = random.randint(0, 100)
+                b = random.randint(200, 255)
+                sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+            elif "-WA" in sensor_name_upper:
+                # Random shade of blue
+                r = random.randint(0, 100)
+                g = random.randint(100, 200)
+                b = random.randint(200, 255)
+                sensor_color = f"#{r:02X}{g:02X}{b:02X}"
+            elif "FMS" in sensor_name_upper:
+                sensor_color = "#DCEB0E"
+            else:
+                sensor_color = "#949494"
+
         else:
-            sensor_color = "#000000"
+            
+            sensor_color = None
+            
+            for fluid_name in total_number_fluid_sensors.keys():
+                if f"-{fluid_name}" in sensor_name_upper:
+                    current_number_fluid_sensors_already_colored[fluid_name] += 1
 
-        return(sensor_color)
+                    if fluid_name == "OX":
+                        min_red = 0
+                        max_red = 130
+                        min_green = 80
+                        max_green = 220
+                        min_blue = 180
+                        max_blue = 255
+                    elif fluid_name == "FU":
+                        min_red = 180
+                        max_red = 255
+                        min_green = 30
+                        max_green = 150
+                        min_blue = 30
+                        max_blue = 150
+                    elif fluid_name == "HE":
+                        min_red = 0
+                        max_red = 120
+                        min_green = 100
+                        max_green = 255
+                        min_blue = 0
+                        max_blue = 120
+                    elif fluid_name == "N2":
+                        min_red = 150
+                        max_red = 255
+                        min_green = 0
+                        max_green = 130
+                        min_blue = 150
+                        max_blue = 255
+                    elif fluid_name == "WA":
+                        min_red = 0
+                        max_red = 120
+                        min_green = 70
+                        max_green = 200
+                        min_blue = 180
+                        max_blue = 255
+                    
+                    current_to_total_sensors_colored = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
+                    red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored))
+                    green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored))
+                    blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored))
+                
+                    sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
+
+            if sensor_color is None:
+                if "FMS" in sensor_name_upper:
+                    sensor_color = "#DCEB0E"
+                else:
+                    sensor_color = "#949494"
+                        
+                
+
+
+        return(sensor_color, current_number_fluid_sensors_already_colored)
+
+
 
     def SensorTypeToAxis(name: str) -> str:
         name_upper = name.upper()
@@ -154,7 +244,7 @@ else:
     SENSORS_TO_PLOT = []
 
     for sensor_name in SENSORS_TO_PLOT_NAMES:
-        sensor_color = FluidNameToColor(sensor_name)
+        sensor_color, current_number_fluid_sensors_already_colored = FluidNameToColor(sensor_name, current_number_fluid_sensors_already_colored)
         sensor_axis = SensorTypeToAxis(sensor_name)
         SENSORS_TO_PLOT.append({"column": sensor_name, "name": sensor_name, "color": sensor_color, "yaxis": sensor_axis},)
 
