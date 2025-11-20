@@ -254,9 +254,9 @@ Y_AXIS_LABELS = {
     "y1": "Pressure [psia]",
     "y2": "Position Indicator [0/1]",
     "y3": "Temperature [°K]",
-    "y4": "RTD Voltage (V)",
-    "y5": "Mass (lbf)",
-    "y6": "unknown sensor",
+    "y4": "RTD Voltage [V]",
+    "y5": "Mass [lbf]",
+    "y6": "unknown sensor [n/a]",
 }
 
 
@@ -576,13 +576,15 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
             continue
 
         x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
-        yaxis_key = sensor.get("yaxis", "y1").lower()
+        y_axis_key = sensor.get("yaxis", "y1").lower()
 
-        if yaxis_key not in used_axes:
-            used_axes.append(yaxis_key)
+        if y_axis_key not in used_axes:
+            used_axes.append(y_axis_key)
 
 
-
+        unit_name = re.search(r"(\[[^\]]+\]|\([^)]+\))\s*$", Y_AXIS_LABELS[y_axis_key]).group(1)
+    
+            
         fig.add_trace(
             go.Scatter(
                 x=x_vals,
@@ -590,8 +592,9 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                 mode="lines",
                 name=sensor.get("name", column),
                 line=dict(color=sensor.get("color")),
-                yaxis=yaxis_key,
+                yaxis=y_axis_key,
                 visible=True,
+                hovertemplate=f"%{{y:.2f}} {unit_name}",
             )
         )
         traces_added += 1
@@ -947,40 +950,105 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         
         color_picker_js = """
         <script>
-        (function(){
+        (function() {
+            // Wait for the plot div to exist
             const gd = document.getElementById("my_fig");
             if (!gd) return;
 
+            // --- Create the panel container ---
+            const panel = document.createElement("div");
+            panel.id = "traceColorPanel";
+            panel.style.position = "fixed";
+            panel.style.bottom = "10px";
+            panel.style.right = "10px";
+            panel.style.padding = "10px";
+            panel.style.backgroundColor = "rgba(255,255,255,0.9)";
+            panel.style.border = "1px solid #888";
+            panel.style.borderRadius = "5px";
+            panel.style.fontFamily = "sans-serif";
+            panel.style.fontSize = "8px";
+            panel.style.zIndex = "9999";
+            panel.style.textAlign = "center"; // center heading
+            panel.innerHTML = '<span style="font-size:12px; font-weight:bold;">Line Colors</span><br>';
+
+            // Optional: check for dark mode toggle
             const themeToggle = document.getElementById("themeToggle");
 
-            // Create panel
-            let panel = document.getElementById("color-panel");
-            if (!panel) {
-                panel = document.createElement("div");
-                panel.id = "color-panel";
-                panel.style.position = "fixed";
-                panel.style.top = "10px";
-                panel.style.right = "10px";
-                panel.style.padding = "10px";
-                panel.style.maxHeight = "90vh";
-                panel.style.overflowY = "auto";
-                panel.style.zIndex = "9999";
-                panel.style.fontFamily = "sans-serif";
-                panel.style.fontSize = "13px";
-                document.body.appendChild(panel);
+            function applyPanelTheme() {
+                if (themeToggle && themeToggle.checked) {
+                    // Dark mode
+                    panel.style.backgroundColor = "rgba(30,30,30,0.9)";
+                    panel.style.border = "1px solid #aaa";
+                    panel.style.color = "#eee";
+                } else {
+                    // Light mode
+                    panel.style.backgroundColor = "rgba(255,255,255,0.9)";
+                    panel.style.border = "1px solid #888";
+                    panel.style.color = "#000";
+                }
             }
 
-            function updatePanelColors() {
-                const isDark = themeToggle && themeToggle.checked;
-                panel.style.background = isDark ? "#111" : "#fff";
-                panel.style.color = isDark ? "#eee" : "#000";
-                panel.style.border = `1px solid ${isDark ? "#555" : "#ccc"}`;
+            // Call it once to set initial theme
+            applyPanelTheme();
+
+            // Update panel when theme changes
+            if (themeToggle) {
+                themeToggle.addEventListener("change", () => {
+                    applyPanelTheme();
+                    updatePanel();
+                });
             }
 
-            function buildColorPickers() {
-                updatePanelColors();
-                panel.innerHTML = "<b>Trace Colors</b><br>";
 
+            // --- Add a row for each visible trace ---
+            gd.data.forEach((trace, i) => {
+                const isVisible = trace.visible !== false && trace.visible !== "legendonly";
+                if (!isVisible) return;
+
+                const row = document.createElement("div");
+                row.style.marginBottom = "5px";
+                row.style.display = "flex";
+                row.style.alignItems = "left";
+                row.style.justifyContent = "left";
+
+                const label = document.createElement("span");
+                label.textContent = trace.name;
+                label.style.marginRight = "5px";
+
+                const input = document.createElement("input");
+                input.type = "color";
+                input.value = trace.line.color || "#757575";
+                input.title = "Change line color";
+
+                // Make the color box small
+                input.style.width = "14px";
+                input.style.height = "8px";
+                input.style.padding = "0";
+                input.style.marginLeft = "5px";
+                input.style.border = themeToggle && themeToggle.checked ? "1px solid #eee" : "1px solid #000";
+                input.style.verticalAlign = "middle";
+                input.style.cursor = "pointer";
+
+                input.addEventListener("input", () => {
+                    Plotly.restyle(gd, {"line.color": input.value}, [i]);
+                });
+
+                row.appendChild(label);
+                row.appendChild(input);
+                panel.appendChild(row);
+            });
+
+            // Attach panel to body
+            document.body.appendChild(panel);
+
+            // Adjust Plotly layout margins to make room for the panel
+            const panelWidth = panel.offsetWidth + 20;
+            Plotly.relayout(gd, {margin: {r: panelWidth}});
+
+            // Optional: Update panel if traces are toggled or restyled
+            function updatePanel() {
+                // Clear previous panel rows
+                panel.innerHTML = '<span style="font-size:12px; font-weight:bold;">Line Colors</span><br>';
                 gd.data.forEach((trace, i) => {
                     const isVisible = trace.visible !== false && trace.visible !== "legendonly";
                     if (!isVisible) return;
@@ -988,19 +1056,25 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                     const row = document.createElement("div");
                     row.style.marginBottom = "5px";
                     row.style.display = "flex";
-                    row.style.alignItems = "center";
+                    row.style.alignItems = "left";
+                    row.style.justifyContent = "left";
 
                     const label = document.createElement("span");
                     label.textContent = trace.name;
                     label.style.marginRight = "5px";
-                    label.style.flex = "1";
 
                     const input = document.createElement("input");
                     input.type = "color";
                     input.value = trace.line.color || "#757575";
                     input.title = "Change trace color";
 
+                    input.style.width = "14px";
+                    input.style.height = "8px";
+                    input.style.padding = "0";
+                    input.style.marginLeft = "5px";
                     input.style.border = themeToggle && themeToggle.checked ? "1px solid #eee" : "1px solid #000";
+                    input.style.verticalAlign = "middle";
+                    input.style.cursor = "pointer";
 
                     input.addEventListener("input", () => {
                         Plotly.restyle(gd, {"line.color": input.value}, [i]);
@@ -1011,24 +1085,12 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                     panel.appendChild(row);
                 });
 
-                // Adjust Plotly layout margins to make room for the panel
-                const panelWidth = panel.offsetWidth + 33; // extra 20px padding
+                // Adjust margins again
+                const panelWidth = panel.offsetWidth + 20;
                 Plotly.relayout(gd, {margin: {r: panelWidth}});
             }
 
-            // Build initially
-            buildColorPickers();
-
-            // Update panel after any restyle
-            gd.on('plotly_restyle', () => setTimeout(buildColorPickers, 50));
-
-            // Update panel colors and adjust margins when theme toggled
-            if (themeToggle) {
-                themeToggle.addEventListener("change", () => setTimeout(buildColorPickers, 50));
-            }
-
-            // Optional: update on window resize so panel doesn't overlap
-            window.addEventListener("resize", () => setTimeout(buildColorPickers, 50));
+            gd.on('plotly_restyle', () => setTimeout(updatePanel, 50));
         })();
         </script>
         """
@@ -1086,7 +1148,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
 
-    DEFAULT_PATH = "data/reduced_11-9-Hotfire-Attempts_new.parquet"
+    DEFAULT_PATH = "data/11-19-2025-hotfire-attempt_love_sosa.parquet"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()
