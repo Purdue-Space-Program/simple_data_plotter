@@ -2,6 +2,7 @@ import argparse, os, re
 from collections import defaultdict
 import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
+from pathlib import Path
 
 THEME = "plotly_white"
 # MAX_POINTS_PER_TRACE = 1_000_000
@@ -602,6 +603,8 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 
     fig.update_layout(
+        
+        title=f"{Path(parquet_path).name}",
 
         yaxis=dict(title="Pressure [psia]", visible=True),
 

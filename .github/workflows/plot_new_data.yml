@@ -72,11 +72,11 @@ jobs:
           python main.py "$file" || echo "Plotting $file failed, continuing..."
         done
 
-    - name: Compress HTML in output/
-      run: |
-        if ls output/*.html 1> /dev/null 2>&1; then
-          gzip -kf output/*.html
-        fi
+    # - name: Compress HTML in output/
+    #   run: |
+    #     if ls output/*.html 1> /dev/null 2>&1; then
+    #       gzip -kf output/*.html
+    #     fi
 
 
 
@@ -99,27 +99,28 @@ jobs:
         echo "<html><head><title>Simple Data Plotter - Index</title></head><body>" > index.html
         echo "<h1>da plots</h1>" >> index.html
         echo "<p>plots:</p><ul>" >> index.html
-
+        
         # Loop through only *.html (exclude index itself)
         shopt -s nullglob
         for file in output/*.html; do
-          file_name=$(basename "$file")
-          if [ "$file_name" != "index.html" ]; then
-            echo "<li><a href='output/$file_name'>$file_name</a></li>" >> index.html
-          fi
+        file_name=$(basename "$file")
+        if [ "$file_name" != "index.html" ]; then
+        echo "<li><a href='output/$file_name'>$file_name</a></li>" >> index.html
+        fi
         done
 
         echo "</ul>" >> index.html
 
         # ---- PDF viewer embed ----
-        if [ -f PSPL_CMS_MASTER_11012025.pdf ]; then
+        if [ -f PSPL_CMS_MASTER_11192025.pdf ]; then
           echo "<h2>CMS Master P&ID</h2>" >> index.html
-          echo "<iframe src='PSPL_CMS_MASTER_11012025.pdf' width='100%' height='800px'></iframe>" >> index.html
+          echo "<iframe src='PSPL_CMS_MASTER_11192025.pdf' width='100%' height='800px'></iframe>" >> index.html
         else
-          echo "<p>No PDF found.</p>" >> index.html
+        echo "<p>No PDF found.</p>" >> index.html
         fi
         # --------------------------
-
+          
+        echo "<p>old plotter: <a href="https://psp.rajanphadnis.com">psp.rajanphadnis.com</a></p> <ul>" >> index.html
         echo "</body></html>" >> index.html
 
 
