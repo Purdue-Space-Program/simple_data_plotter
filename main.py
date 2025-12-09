@@ -86,6 +86,8 @@ else:
         "SV-N2-02_STATE",
         "SV-N2-02",
 
+        "TC-BATTERY",
+
         "FMS",
     ]
 
@@ -263,13 +265,37 @@ Y_AXIS_LABELS = {
 
 DEV5_TIME, DEV6_TIME = "Dev5_BCLS_ai_time", "Dev6_BCLS_ai_time"
 
+# source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV5_CHANNELS = [
+    # Control Wiring
+    "PV-FU-02",
+    "PV-OX-02",
+    "PV-FU-03",
+    "PV-OX-03",
+    "SV-BP-01",
+    "SV-N2-01",
+    "PV-HE-01",
+    "PI-HE-01",
+    "SV-HE-201",
+    "SV-HE-202",
+    "SV-HE-201-state",
+    "SV-HE-201-state_time",
+    "SV-HE-202-state",
+    "SV-HE-201-position",
+    "SV-HE-202-position",
+    "SV-QD-03",
+    "DELUGE",
+    "SV-QD-01",
+    "ACTUATOR",
+    "IGNITOR",    
+    
+    # Data Wiring
     "PT-FU-04",
     "PT-HE-01",
-    "PT-OX-02",
+    "PT-OX-04",
     "PT-N2-01",
     "PT-FU-02",
-    "PT-OX-04",
+    "PT-OX-02",
     "TC-OX-04",
     "TC-FU-04",
     "TC-OX-02",
@@ -282,19 +308,23 @@ DEV5_CHANNELS = [
     "TC-HE-201",
 ]
 
+# source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV6_CHANNELS = [
+    # Control Wiring 
     "PV-FU-04",
+    "HS_CAMERA",
     "SV-N2-02",
     "SV-N2-03",
-    "TC-FU-202",
-    "TC-OX-202",
-    "TC-FU-VENT",
-    "PT-FU-06",
-    "PT-CHAMBER",
+    
+    # Data Wiring
     "TC-BATTERY",
-    "HS_CAMERA",
+    "TC-OX-202",
+    "TC-FU-202",
+    "TC-FU-VENT",
+    "PT-CHAMBER",
+    "PT-FU-06",
+    "PT-FU-6",
 ]
-
 
 
 channels = [
@@ -312,18 +342,9 @@ def DirectPairs(csv_columns):
 
         if csv_column.lower().endswith("_time"):
             sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
-
-            for channel, time in channels:
-                # check if it is time
-                # if (csv_column in (c[1] for c in channels)):
-                #     pairs[time] = [sensor_name]
-
-                # elif sensor_name in channel:
-                if sensor_name in SENSORS_TO_PLOT_NAMES:
-                    pairs[csv_column] = [sensor_name]
-
-                elif channel == channels[-1][0]:
-                    print(f"Warning: Column '{sensor_name}' not found; skipping.")
+            
+            if ("BCLS_ai" not in sensor_name):
+                sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
 
 
     # ##### compare with old version
@@ -353,16 +374,7 @@ def MakePIPairs(csv_columns):
 
         if m != None:
             sensor_name = m.group(1)
-            if sensor_name in SENSORS_TO_PLOT_NAMES:
-
-                if (m and sensor_name in csv_columns):
-
-                        pairs[csv_column] = [m.group(1)]
-
-
-            else:
-                print(f"Warning: Column '{csv_column}' not found; skipping.")
-
+            pairs[csv_column] = [sensor_name]
 
     # ######### compare with old version
     # print(f"\n{pairs}")
@@ -393,14 +405,8 @@ def BCLSPairs(csv_columns):
         if time in csv_columns:
             for sensor_name in channel:
 
-                if sensor_name in csv_columns:
-                    if (sensor_name in SENSORS_TO_PLOT_NAMES):
-                        pairs[time].append(sensor_name)
-
-                    elif channel == channels[-1][0]:
-                        print(f"Warning: Column '{sensor_name}' not found; skipping.")
-
-
+                # if sensor_name in csv_columns:
+                    pairs[time].append(sensor_name)
 
 
     # ############ compare with old version
@@ -568,7 +574,8 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
     for sensor in SENSORS_TO_PLOT:
         column = sensor["column"]
         if column not in df.columns:
-            continue
+            print(f"Warning: Column '{sensor_name}' not found; skipping.")
+
 
         y = pd.to_numeric(df[column], errors="coerce")
         mask = y.notna()
@@ -1151,7 +1158,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
 
-    DEFAULT_PATH = "data/11-19-2025-hotfire-attempt_love_sosa.parquet"
+    DEFAULT_PATH = "data/04-06-2025-cold_flow.csv"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()

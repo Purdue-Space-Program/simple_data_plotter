@@ -108,9 +108,11 @@ jobs:
         echo "<li><a href='output/$file_name'>$file_name</a></li>" >> index.html
         fi
         done
-
+        
         echo "</ul>" >> index.html
-
+        
+        echo "<p>old plotter: <a href="https://psp.rajanphadnis.com">psp.rajanphadnis.com</a></p> <ul>" >> index.html
+        
         # ---- PDF viewer embed ----
         if [ -f PSPL_CMS_MASTER_11192025.pdf ]; then
           echo "<h2>CMS Master P&ID</h2>" >> index.html
@@ -120,7 +122,6 @@ jobs:
         fi
         # --------------------------
           
-        echo "<p>old plotter: <a href="https://psp.rajanphadnis.com">psp.rajanphadnis.com</a></p> <ul>" >> index.html
         echo "</body></html>" >> index.html
 
 
