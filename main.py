@@ -4,9 +4,13 @@ import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
 from pathlib import Path
 
-THEME = "plotly_white"
-# MAX_POINTS_PER_TRACE = 1_000_000
-MAX_POINTS_PER_TRACE = 50_000
+THEME = "plotly_dark"
+
+if __debug__:
+    # MAX_POINTS_PER_TRACE = 1_000_000
+    MAX_POINTS_PER_TRACE = 50_000
+else:
+    MAX_POINTS_PER_TRACE = 50
 
 
 use_davids_auto_sensors = True
@@ -333,7 +337,7 @@ channels = [
     ]
 
 
-def DirectPairs(csv_columns):
+def VehicleSensorsPairs(csv_columns, already_paired_sensors):
     print("\nDirectPairs")
 
     pairs = {}
@@ -343,8 +347,12 @@ def DirectPairs(csv_columns):
         if csv_column.lower().endswith("_time"):
             sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
             
+            # avoid pairing time itself
             if ("BCLS_ai" not in sensor_name):
                 sensor_name = re.sub(r"(_time|_TIME)$", "", csv_column)
+
+                if sensor_name not in already_paired_sensors:
+                    pairs[csv_column] = [sensor_name]
 
 
     # ##### compare with old version
@@ -364,7 +372,7 @@ def DirectPairs(csv_columns):
     return pairs
 
 
-def MakePIPairs(csv_columns):
+def MakePIPairs(csv_columns, already_paired_sensors):
     print("\nMakePIPairs")
 
     pairs = {}
@@ -374,7 +382,9 @@ def MakePIPairs(csv_columns):
 
         if m != None:
             sensor_name = m.group(1)
-            pairs[csv_column] = [sensor_name]
+            
+            if sensor_name not in already_paired_sensors:
+                pairs[csv_column] = [sensor_name]
 
     # ######### compare with old version
     # print(f"\n{pairs}")
@@ -396,7 +406,7 @@ def MakePIPairs(csv_columns):
     return pairs
 
 
-def BCLSPairs(csv_columns):
+def BCLSPairs(csv_columns, already_paired_sensors):
     print("\nBCLSPairs")
 
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
@@ -405,12 +415,13 @@ def BCLSPairs(csv_columns):
         if time in csv_columns:
             for sensor_name in channel:
 
-                # if sensor_name in csv_columns:
-                    pairs[time].append(sensor_name)
+                if sensor_name in csv_columns:
+                    if sensor_name not in already_paired_sensors:
+                        pairs[time].append(sensor_name)
 
 
-    # ############ compare with old version
-    # print(f"\n{pairs}")
+    # ########### compare with old version
+    # print(f"New Version: \n{pairs}")
     # pairs = None
 
     # pairs = defaultdict(list)
@@ -424,7 +435,7 @@ def BCLSPairs(csv_columns):
     #         if ch in csv_columns:
     #             pairs[DEV6_TIME].append(ch)
 
-    # print(f"\n{pairs}\n")
+    # print(f"\n\nOld Version: \n{pairs}\n")
     # ############ compare with old version
 
     return(pairs)
@@ -432,10 +443,25 @@ def BCLSPairs(csv_columns):
 
 def FindGroups(csv_columns):
     groups = defaultdict(list)
-    for d in (DirectPairs(csv_columns), MakePIPairs(csv_columns), BCLSPairs(csv_columns)):
-        for t, ds in d.items():
-            groups[t].extend(ds)
+    
+    already_paired_sensors = {}
+    already_paired_sensor_names = []
+    pairing_functions = [VehicleSensorsPairs, MakePIPairs, BCLSPairs]
+    
+    
+    for pairing_function in pairing_functions:
+        newly_paired_sensors = pairing_function(csv_columns, already_paired_sensor_names)
+        
+        already_paired_sensors.update(newly_paired_sensors)
+        
+        for already_paired_sensor_name in already_paired_sensors.values():
+            already_paired_sensor_names.append(already_paired_sensor_name[0])
+
+    
+    for t, ds in already_paired_sensors.items():
+        groups[t].extend(ds)
     return groups
+
 
 
 def ConvertCSVToParquet(input_csv: str) -> str:
@@ -448,16 +474,16 @@ def ConvertCSVToParquet(input_csv: str) -> str:
     if not groups:
         raise ValueError("No valid time-column groupings found in CSV")
 
-    usecols = {t for t in groups} | {d for ds in groups.values() for d in ds}
+    data_columns_to_plot = {t for t in groups} | {d for ds in groups.values() for d in ds}
     print(
-        f"Found {len(groups)} time column groups, {len(usecols)} total columns to process"
+        f"Found {len(groups)} time column groups, {len(data_columns_to_plot)} total columns to process"
     )
 
     # Read entire CSV at once with optimizations
     print("Reading CSV data...")
     df = pd.read_csv(
         input_csv,
-        usecols=list(usecols),
+        usecols=list(data_columns_to_plot),
         low_memory=False,
         on_bad_lines="warn",
         engine="c",
@@ -489,9 +515,9 @@ def ConvertCSVToParquet(input_csv: str) -> str:
             subset = subset.groupby(level=0).mean()
 
         # Convert all data columns to numeric at once
-        for c in data_columns:
-            if c in subset.columns:
-                subset[c] = pd.to_numeric(subset[c], errors="coerce")
+        for data_column in data_columns:
+            if data_column in subset.columns:
+                subset[data_column] = pd.to_numeric(subset[data_column], errors="coerce")
 
         all_frames.append(subset)
         print(f"  Processed {time_column}: {len(subset)} rows, {len(subset.columns)} sensors")
@@ -1158,7 +1184,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
 
-    DEFAULT_PATH = "data/04-06-2025-cold_flow.csv"
+    DEFAULT_PATH = "data/test_data_truncated.csv"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()
@@ -1177,7 +1203,7 @@ def main():
 
     if args.input_path is _SENTINEL:
         # user did NOT provide input_path
-        print(f"WARNING!!!!!!!!!!! No input file provided, using default input path: {DEFAULT_PATH}")
+        print(f"\nWARNING!!!!!!!!!!! No input file provided, using default input path: {DEFAULT_PATH}\n")
         args.input_path = DEFAULT_PATH
 
     path_to_input_file = args.input_path
