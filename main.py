@@ -333,7 +333,7 @@ DEV6_CHANNELS = [
 
 channels = [
     [DEV5_CHANNELS, DEV5_TIME],
-    [DEV6_CHANNELS, DEV6_TIME]
+    # [DEV6_CHANNELS, DEV6_TIME]
     ]
 
 
@@ -599,12 +599,14 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
     for sensor in SENSORS_TO_PLOT:
         column = sensor["column"]
-        if column not in df.columns:
-            print(f"Warning: Column '{sensor_name}' not found; skipping.")
+        # if column not in df.columns:
+        #     print(f"Warning: Column '{sensor_name}' not found; skipping.")
 
-
-        y = pd.to_numeric(df[column], errors="coerce")
-        mask = y.notna()
+        try:
+            y = pd.to_numeric(df[column], errors="coerce")
+            mask = y.notna()
+        except KeyError:
+            print(f"🚫 {column} not found in data!")
 
         if not mask.any():
             continue
@@ -632,7 +634,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
             )
         )
         traces_added += 1
-        print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
+        print(f"✅ Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
 
 
     fig.update_layout(
@@ -1184,7 +1186,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
 
-    DEFAULT_PATH = "data/test_data_truncated.csv"
+    DEFAULT_PATH = "utils/test_data_truncated.csv"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()
@@ -1216,9 +1218,13 @@ def main():
     else:
         raise SystemExit("input must be .csv or .parquet")
 
-    html_out = os.path.join("output", f"{input_file_name}.html")
-    PlotParquet(parquet_path, html_out, args.start, args.end)
-    print(f"\n✓ Complete! Plot saved to: {html_out}")
+    if args.input_path != DEFAULT_PATH:
+        html_output_path = os.path.join("output", f"{input_file_name}.html")
+    else:
+        html_output_path = os.path.join("utils", f"{input_file_name}.html")
+        
+    PlotParquet(parquet_path, html_output_path, args.start, args.end)
+    print(f"\n✓ Complete! Plot saved to: {html_output_path}")
 
 
 if __name__ == "__main__":
