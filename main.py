@@ -4,7 +4,7 @@ import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
 from pathlib import Path
 
-THEME = "plotly_dark"
+THEME = "plotly_white"
 
 if __debug__:
     # MAX_POINTS_PER_TRACE = 1_000_000
@@ -128,34 +128,34 @@ else:
         
         if color_selection == "random":
 
-            if "-OX" in sensor_name_upper:
+            if "_OX" in sensor_name_upper:
                 # sensor_color = "#3EABFF"
                 # Random shade of blue
                 r = random.randint(0, 100)
                 g = random.randint(100, 200)
                 b = random.randint(200, 255)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-FU" in sensor_name_upper:
+            elif "_FU" in sensor_name_upper:
                 # sensor_color = "#6D0000"
                 # Random shade of red
                 r = random.randint(200, 255)
                 g = random.randint(50, 150)
                 b = random.randint(0, 100)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-HE" in sensor_name_upper:
+            elif "_HE" in sensor_name_upper:
                 # sensor_color = "#6D0000"
                 # Random shade of green
                 r = random.randint(0, 100)
                 g = random.randint(200, 255)
                 b = random.randint(0, 100)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-N2" in sensor_name_upper:
+            elif "_N2" in sensor_name_upper:
                 # Random shade of purple
                 r = random.randint(200, 255)
                 g = random.randint(0, 100)
                 b = random.randint(200, 255)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-WA" in sensor_name_upper:
+            elif "_WA" in sensor_name_upper:
                 # Random shade of blue
                 r = random.randint(0, 100)
                 g = random.randint(100, 200)
@@ -648,8 +648,8 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
     fig.update_layout(
         
-        title=f"{Path(parquet_path).name}",
-
+        title = f"{Path(parquet_path).with_suffix("").name}",
+        
         yaxis=dict(title="Pressure [psia]", visible=True),
 
         yaxis2=dict(title="Position Indicator [0/1]",
