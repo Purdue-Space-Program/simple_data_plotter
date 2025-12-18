@@ -116,7 +116,7 @@ else:
         
         for fluid_name in total_number_fluid_sensors.keys():
             
-            if f"-{fluid_name}" in name_upper:
+            if f"_{fluid_name}" in name_upper:
                 total_number_fluid_sensors[fluid_name] += 1
                 
                 
@@ -209,17 +209,17 @@ else:
                         max_green = 200
                         min_blue = 180
                         max_blue = 255
+                    else:
+                        raise ValueError("what")
                     
-                    
-                    if total_number_fluid_sensors[fluid_name] != 0:
-                        
-                        current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
+    
+                    current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
 
-                        red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
-                        green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
-                        blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
-                    
-                        sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
+                    red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
+                    green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
+                    blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
+                
+                    sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
 
             if sensor_color is None:
                 if "FMS" in sensor_name_upper:
@@ -834,13 +834,13 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                     ];
 
                     const handlers = [
-                        () => toggleGroup("-OX"),
-                        () => toggleGroup("-FU"),
-                        () => toggleGroup("-HE"),
-                        () => toggleGroup("PT-"),
-                        () => toggleGroup("TC-"),
-                        () => toggleGroup("RTD-"),
-                        () => toggleGroup("PI-"),
+                        () => toggleGroup("_OX"),
+                        () => toggleGroup("_FU"),
+                        () => toggleGroup("_HE"),
+                        () => toggleGroup("PT_"),
+                        () => toggleGroup("TC_"),
+                        () => toggleGroup("RTD_"),
+                        () => toggleGroup("PI_"),
                         () => toggleGroup("FMS"),
                         () => toggleGroup("ALL"),
                     ];
