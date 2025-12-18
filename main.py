@@ -53,44 +53,44 @@ if use_davids_auto_sensors == False:
 else:
 
     SENSORS_TO_PLOT_NAMES = [
-        "PT-OX-02",
-        "PT-OX-04",
-        "PT-OX-201",
-        "PT-OX-202",
+        "PT_OX_02",
+        "PT_OX_04",
+        "PT_OX_201",
+        "PT_OX_202",
 
-        "TC-OX-02",
-        "TC-OX-04",
-        "TC-OX-202",
-        "TC-OX-201",
-        "RTD-OX",
+        "TC_OX_02",
+        "TC_OX_04",
+        "TC_OX_202",
+        "TC_OX_201",
+        "RTD_OX",
 
-        "PI-OX-02",
-        "PI-OX-03",
+        "PI_OX_02",
+        "PI_OX_03",
 
-        "PT-FU-06",
-        "PT-FU-04",
-        "PT-FU-02",
-        "PT-FU-201",
-        "PT-FU-202",
+        "PT_FU_06",
+        "PT_FU_04",
+        "PT_FU_02",
+        "PT_FU_201",
+        "PT_FU_202",
 
-        "TC-FU-04",
-        "TC-FU-02",
-        "TC-FU-202",
-        "TC-FU-201",
-        "RTD-FU",
+        "TC_FU_04",
+        "TC_FU_02",
+        "TC_FU_202",
+        "TC_FU_201",
+        "RTD_FU",
 
-        "PI-FU-02",
-        "PI-FU-03",
-        "PI-FU-04",
+        "PI_FU_02",
+        "PI_FU_03",
+        "PI_FU_04",
 
-        "PT-HE-01",
-        "PT-HE-201",
-        "TC-HE-201",
+        "PT_HE_01",
+        "PT_HE_201",
+        "TC_HE_201",
 
-        "SV-N2-02_STATE",
-        "SV-N2-02",
+        "SV_N2_02_STATE",
+        "SV_N2_02",
 
-        "TC-BATTERY",
+        "TC_BATTERY",
 
         "FMS",
     ]
@@ -272,68 +272,68 @@ DEV5_TIME, DEV6_TIME = "Dev5_BCLS_ai_time", "Dev6_BCLS_ai_time"
 # source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV5_CHANNELS = [
     # Control Wiring
-    "PV-FU-02",
-    "PV-OX-02",
-    "PV-FU-03",
-    "PV-OX-03",
-    "SV-BP-01",
-    "SV-N2-01",
-    "PV-HE-01",
-    "PI-HE-01",
-    "SV-HE-201",
-    "SV-HE-202",
-    "SV-HE-201-state",
-    "SV-HE-201-state_time",
-    "SV-HE-202-state",
-    "SV-HE-201-position",
-    "SV-HE-202-position",
-    "SV-QD-03",
+    "PV_FU_02",
+    "PV_OX_02",
+    "PV_FU_03",
+    "PV_OX_03",
+    "SV_BP_01",
+    "SV_N2_01",
+    "PV_HE_01",
+    "PI_HE_01",
+    "SV_HE_201",
+    "SV_HE_202",
+    "SV_HE_201_state",
+    "SV_HE_201_state_time",
+    "SV_HE_202_state",
+    "SV_HE_201_position",
+    "SV_HE_202_position",
+    "SV_QD_03",
     "DELUGE",
-    "SV-QD-01",
+    "SV_QD_01",
     "ACTUATOR",
     "IGNITOR",    
     
     # Data Wiring
-    "PT-FU-04",
-    "PT-HE-01",
-    "PT-OX-04",
-    "PT-N2-01",
-    "PT-FU-02",
-    "PT-OX-02",
-    "TC-OX-04",
-    "TC-FU-04",
-    "TC-OX-02",
-    "TC-FU-02",
+    "PT_FU_04",
+    "PT_HE_01",
+    "PT_OX_04",
+    "PT_N2_01",
+    "PT_FU_02",
+    "PT_OX_02",
+    "TC_OX_04",
+    "TC_FU_04",
+    "TC_OX_02",
+    "TC_FU_02",
     "FMS",
-    "RTD-OX",
-    "RTD-FU",
-    "PT-FU-202",
-    "PT-OX-202",
-    "TC-HE-201",
+    "RTD_OX",
+    "RTD_FU",
+    "PT_FU_202",
+    "PT_OX_202",
+    "TC_HE_201",
 ]
 
 # source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV6_CHANNELS = [
     # Control Wiring 
-    "PV-FU-04",
+    "PV_FU_04",
     "HS_CAMERA",
-    "SV-N2-02",
-    "SV-N2-03",
+    "SV_N2_02",
+    "SV_N2_03",
     
     # Data Wiring
-    "TC-BATTERY",
-    "TC-OX-202",
-    "TC-FU-202",
-    "TC-FU-VENT",
-    "PT-CHAMBER",
-    "PT-FU-06",
-    "PT-FU-6",
+    "TC_BATTERY",
+    "TC_OX_202",
+    "TC_FU_202",
+    "TC_FU_VENT",
+    "PT_CHAMBER",
+    "PT_FU_06",
+    "PT_FU_6",
 ]
 
 
 channels = [
     [DEV5_CHANNELS, DEV5_TIME],
-    # [DEV6_CHANNELS, DEV6_TIME]
+    [DEV6_CHANNELS, DEV6_TIME]
     ]
 
 
@@ -407,6 +407,7 @@ def MakePIPairs(csv_columns, already_paired_sensors):
 
 
 def BCLSPairs(csv_columns, already_paired_sensors):
+    
     print("\nBCLSPairs")
 
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
@@ -414,10 +415,12 @@ def BCLSPairs(csv_columns, already_paired_sensors):
     for channel, time in channels:
         if time in csv_columns:
             for sensor_name in channel:
-
-                if sensor_name in csv_columns:
-                    if sensor_name not in already_paired_sensors:
-                        pairs[time].append(sensor_name)
+                # if sensor_name == "PT-FU-02":
+                #     pass
+                    
+                    if sensor_name in csv_columns:
+                        if sensor_name not in already_paired_sensors:
+                            pairs[time].append(sensor_name)
 
 
     # ########### compare with old version
@@ -479,11 +482,16 @@ def ConvertCSVToParquet(input_csv: str) -> str:
         f"Found {len(groups)} time column groups, {len(data_columns_to_plot)} total columns to process"
     )
 
+    data_columns_to_plot = set(data_columns_to_plot)
+    data_columns_to_plot.remove("Dev5_state")
+    data_columns_to_plot.remove("Dev6_state")
+    
+    
     # Read entire CSV at once with optimizations
     print("Reading CSV data...")
     df = pd.read_csv(
         input_csv,
-        usecols=list(data_columns_to_plot),
+        usecols=set(data_columns_to_plot),
         low_memory=False,
         on_bad_lines="warn",
         engine="c",
@@ -605,36 +613,37 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
         try:
             y = pd.to_numeric(df[column], errors="coerce")
             mask = y.notna()
+            if not mask.any():
+                continue
+
+            x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
+            y_axis_key = sensor.get("yaxis", "y1").lower()
+
+            if y_axis_key not in used_axes:
+                used_axes.append(y_axis_key)
+
+
+            unit_name = re.search(r"(\[[^\]]+\]|\([^)]+\))\s*$", Y_AXIS_LABELS[y_axis_key]).group(1)
+        
+                
+            fig.add_trace(
+                go.Scatter(
+                    x=x_vals,
+                    y=y_vals,
+                    mode="lines",
+                    name=sensor.get("name", column),
+                    line=dict(color=sensor.get("color")),
+                    yaxis=y_axis_key,
+                    visible=True,
+                    hovertemplate=f"%{{y:.2f}} {unit_name}",
+                )
+            )
+            traces_added += 1
+            print(f"✅ Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
+            
         except KeyError:
             print(f"🚫 {column} not found in data!")
 
-        if not mask.any():
-            continue
-
-        x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
-        y_axis_key = sensor.get("yaxis", "y1").lower()
-
-        if y_axis_key not in used_axes:
-            used_axes.append(y_axis_key)
-
-
-        unit_name = re.search(r"(\[[^\]]+\]|\([^)]+\))\s*$", Y_AXIS_LABELS[y_axis_key]).group(1)
-    
-            
-        fig.add_trace(
-            go.Scatter(
-                x=x_vals,
-                y=y_vals,
-                mode="lines",
-                name=sensor.get("name", column),
-                line=dict(color=sensor.get("color")),
-                yaxis=y_axis_key,
-                visible=True,
-                hovertemplate=f"%{{y:.2f}} {unit_name}",
-            )
-        )
-        traces_added += 1
-        print(f"✅ Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
 
 
     fig.update_layout(
