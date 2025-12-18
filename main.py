@@ -338,7 +338,7 @@ channels = [
 
 
 def VehicleSensorsPairs(csv_columns, already_paired_sensors):
-    print("\nDirectPairs")
+    # print("\nDirectPairs")
 
     pairs = {}
 
@@ -373,7 +373,7 @@ def VehicleSensorsPairs(csv_columns, already_paired_sensors):
 
 
 def MakePIPairs(csv_columns, already_paired_sensors):
-    print("\nMakePIPairs")
+    # print("\nMakePIPairs")
 
     pairs = {}
 
@@ -407,8 +407,8 @@ def MakePIPairs(csv_columns, already_paired_sensors):
 
 
 def BCLSPairs(csv_columns, already_paired_sensors):
+    # print("\nBCLSPairs")
     
-    print("\nBCLSPairs")
 
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
 
