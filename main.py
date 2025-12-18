@@ -171,7 +171,7 @@ else:
             sensor_color = None
             
             for fluid_name in total_number_fluid_sensors.keys():
-                if f"-{fluid_name}" in sensor_name_upper:
+                if f"_{fluid_name}" in sensor_name_upper:
                     current_number_fluid_sensors_already_colored[fluid_name] += 1
 
                     if fluid_name == "OX":
@@ -210,12 +210,16 @@ else:
                         min_blue = 180
                         max_blue = 255
                     
-                    current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
-                    red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
-                    green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
-                    blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
-                
-                    sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
+                    
+                    if total_number_fluid_sensors[fluid_name] != 0:
+                        
+                        current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
+
+                        red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
+                        green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
+                        blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
+                    
+                        sensor_color = f"#{red:02X}{green:02X}{blue:02X}"
 
             if sensor_color is None:
                 if "FMS" in sensor_name_upper:
@@ -233,13 +237,13 @@ else:
     def SensorTypeToAxis(name: str) -> str:
         name_upper = name.upper()
 
-        if "PT-" in name_upper:
+        if "PT_" in name_upper:
             sensor_axis = "y1"
-        elif "PI-" in name_upper:
+        elif "PI_" in name_upper:
             sensor_axis = "y2"
-        elif "TC-" in name_upper:
+        elif "TC_" in name_upper:
             sensor_axis = "y3"
-        elif "RTD-" in name_upper:
+        elif "RTD_" in name_upper:
             sensor_axis = "y4"
         elif "FMS" in name_upper:
             sensor_axis = "y5"
