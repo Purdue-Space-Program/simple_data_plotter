@@ -37,7 +37,7 @@ def truncate_csv_after_maximum_row_count(
 
 
 truncate_csv_after_maximum_row_count(
-    input_csv_file_path=f"test_data.csv",
+    input_csv_file_path=f"11-22-2025-methane_fill_csv.csv",
     output_csv_file_path="test_data_truncated.csv",
     maximum_number_of_rows_to_keep=100
 )

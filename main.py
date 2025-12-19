@@ -4,7 +4,7 @@ import numpy as np, pandas as pd, plotly.graph_objects as go, plotly.io as pio
 import random
 from pathlib import Path
 
-THEME = "plotly_dark"
+THEME = "plotly_white"
 
 if __debug__:
     # MAX_POINTS_PER_TRACE = 1_000_000
@@ -53,44 +53,44 @@ if use_davids_auto_sensors == False:
 else:
 
     SENSORS_TO_PLOT_NAMES = [
-        "PT-OX-02",
-        "PT-OX-04",
-        "PT-OX-201",
-        "PT-OX-202",
+        "PT_OX_02",
+        "PT_OX_04",
+        "PT_OX_201",
+        "PT_OX_202",
 
-        "TC-OX-02",
-        "TC-OX-04",
-        "TC-OX-202",
-        "TC-OX-201",
-        "RTD-OX",
+        "TC_OX_02",
+        "TC_OX_04",
+        "TC_OX_202",
+        "TC_OX_201",
+        "RTD_OX",
 
-        "PI-OX-02",
-        "PI-OX-03",
+        "PI_OX_02",
+        "PI_OX_03",
 
-        "PT-FU-06",
-        "PT-FU-04",
-        "PT-FU-02",
-        "PT-FU-201",
-        "PT-FU-202",
+        "PT_FU_06",
+        "PT_FU_04",
+        "PT_FU_02",
+        "PT_FU_201",
+        "PT_FU_202",
 
-        "TC-FU-04",
-        "TC-FU-02",
-        "TC-FU-202",
-        "TC-FU-201",
-        "RTD-FU",
+        "TC_FU_04",
+        "TC_FU_02",
+        "TC_FU_202",
+        "TC_FU_201",
+        "RTD_FU",
 
-        "PI-FU-02",
-        "PI-FU-03",
-        "PI-FU-04",
+        "PI_FU_02",
+        "PI_FU_03",
+        "PI_FU_04",
 
-        "PT-HE-01",
-        "PT-HE-201",
-        "TC-HE-201",
+        "PT_HE_01",
+        "PT_HE_201",
+        "TC_HE_201",
 
-        "SV-N2-02_STATE",
-        "SV-N2-02",
+        "SV_N2_02_STATE",
+        "SV_N2_02",
 
-        "TC-BATTERY",
+        "TC_BATTERY",
 
         "FMS",
     ]
@@ -116,7 +116,7 @@ else:
         
         for fluid_name in total_number_fluid_sensors.keys():
             
-            if f"-{fluid_name}" in name_upper:
+            if f"_{fluid_name}" in name_upper:
                 total_number_fluid_sensors[fluid_name] += 1
                 
                 
@@ -128,34 +128,34 @@ else:
         
         if color_selection == "random":
 
-            if "-OX" in sensor_name_upper:
+            if "_OX" in sensor_name_upper:
                 # sensor_color = "#3EABFF"
                 # Random shade of blue
                 r = random.randint(0, 100)
                 g = random.randint(100, 200)
                 b = random.randint(200, 255)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-FU" in sensor_name_upper:
+            elif "_FU" in sensor_name_upper:
                 # sensor_color = "#6D0000"
                 # Random shade of red
                 r = random.randint(200, 255)
                 g = random.randint(50, 150)
                 b = random.randint(0, 100)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-HE" in sensor_name_upper:
+            elif "_HE" in sensor_name_upper:
                 # sensor_color = "#6D0000"
                 # Random shade of green
                 r = random.randint(0, 100)
                 g = random.randint(200, 255)
                 b = random.randint(0, 100)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-N2" in sensor_name_upper:
+            elif "_N2" in sensor_name_upper:
                 # Random shade of purple
                 r = random.randint(200, 255)
                 g = random.randint(0, 100)
                 b = random.randint(200, 255)
                 sensor_color = f"#{r:02X}{g:02X}{b:02X}"
-            elif "-WA" in sensor_name_upper:
+            elif "_WA" in sensor_name_upper:
                 # Random shade of blue
                 r = random.randint(0, 100)
                 g = random.randint(100, 200)
@@ -171,7 +171,7 @@ else:
             sensor_color = None
             
             for fluid_name in total_number_fluid_sensors.keys():
-                if f"-{fluid_name}" in sensor_name_upper:
+                if f"_{fluid_name}" in sensor_name_upper:
                     current_number_fluid_sensors_already_colored[fluid_name] += 1
 
                     if fluid_name == "OX":
@@ -209,8 +209,12 @@ else:
                         max_green = 200
                         min_blue = 180
                         max_blue = 255
+                    else:
+                        raise ValueError("what")
                     
+    
                     current_to_total_sensors_colored_ratio = (current_number_fluid_sensors_already_colored[fluid_name]/total_number_fluid_sensors[fluid_name])
+
                     red = int(min_red + ((max_red-min_red) * current_to_total_sensors_colored_ratio))
                     green = int(max_green + ((min_green-max_green) * current_to_total_sensors_colored_ratio))
                     blue = int(min_blue + ((max_blue-min_blue) * current_to_total_sensors_colored_ratio))
@@ -233,13 +237,13 @@ else:
     def SensorTypeToAxis(name: str) -> str:
         name_upper = name.upper()
 
-        if "PT-" in name_upper:
+        if "PT_" in name_upper:
             sensor_axis = "y1"
-        elif "PI-" in name_upper:
+        elif "PI_" in name_upper:
             sensor_axis = "y2"
-        elif "TC-" in name_upper:
+        elif "TC_" in name_upper:
             sensor_axis = "y3"
-        elif "RTD-" in name_upper:
+        elif "RTD_" in name_upper:
             sensor_axis = "y4"
         elif "FMS" in name_upper:
             sensor_axis = "y5"
@@ -272,62 +276,62 @@ DEV5_TIME, DEV6_TIME = "Dev5_BCLS_ai_time", "Dev6_BCLS_ai_time"
 # source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV5_CHANNELS = [
     # Control Wiring
-    "PV-FU-02",
-    "PV-OX-02",
-    "PV-FU-03",
-    "PV-OX-03",
-    "SV-BP-01",
-    "SV-N2-01",
-    "PV-HE-01",
-    "PI-HE-01",
-    "SV-HE-201",
-    "SV-HE-202",
-    "SV-HE-201-state",
-    "SV-HE-201-state_time",
-    "SV-HE-202-state",
-    "SV-HE-201-position",
-    "SV-HE-202-position",
-    "SV-QD-03",
+    "PV_FU_02",
+    "PV_OX_02",
+    "PV_FU_03",
+    "PV_OX_03",
+    "SV_BP_01",
+    "SV_N2_01",
+    "PV_HE_01",
+    "PI_HE_01",
+    "SV_HE_201",
+    "SV_HE_202",
+    "SV_HE_201_state",
+    "SV_HE_201_state_time",
+    "SV_HE_202_state",
+    "SV_HE_201_position",
+    "SV_HE_202_position",
+    "SV_QD_03",
     "DELUGE",
-    "SV-QD-01",
+    "SV_QD_01",
     "ACTUATOR",
     "IGNITOR",    
     
     # Data Wiring
-    "PT-FU-04",
-    "PT-HE-01",
-    "PT-OX-04",
-    "PT-N2-01",
-    "PT-FU-02",
-    "PT-OX-02",
-    "TC-OX-04",
-    "TC-FU-04",
-    "TC-OX-02",
-    "TC-FU-02",
+    "PT_FU_04",
+    "PT_HE_01",
+    "PT_OX_04",
+    "PT_N2_01",
+    "PT_FU_02",
+    "PT_OX_02",
+    "TC_OX_04",
+    "TC_FU_04",
+    "TC_OX_02",
+    "TC_FU_02",
     "FMS",
-    "RTD-OX",
-    "RTD-FU",
-    "PT-FU-202",
-    "PT-OX-202",
-    "TC-HE-201",
+    "RTD_OX",
+    "RTD_FU",
+    "PT_FU_202",
+    "PT_OX_202",
+    "TC_HE_201",
 ]
 
 # source: https://github.com/Purdue-Space-Program/PSPL_DAQ/tree/525aad863caa300921295408a1d6e08e39765564/daq_system/inputs
 DEV6_CHANNELS = [
     # Control Wiring 
-    "PV-FU-04",
+    "PV_FU_04",
     "HS_CAMERA",
-    "SV-N2-02",
-    "SV-N2-03",
+    "SV_N2_02",
+    "SV_N2_03",
     
     # Data Wiring
-    "TC-BATTERY",
-    "TC-OX-202",
-    "TC-FU-202",
-    "TC-FU-VENT",
-    "PT-CHAMBER",
-    "PT-FU-06",
-    "PT-FU-6",
+    "TC_BATTERY",
+    "TC_OX_202",
+    "TC_FU_202",
+    "TC_FU_VENT",
+    "PT_CHAMBER",
+    "PT_FU_06",
+    "PT_FU_6",
 ]
 
 
@@ -338,7 +342,7 @@ channels = [
 
 
 def VehicleSensorsPairs(csv_columns, already_paired_sensors):
-    print("\nDirectPairs")
+    # print("\nDirectPairs")
 
     pairs = {}
 
@@ -373,7 +377,7 @@ def VehicleSensorsPairs(csv_columns, already_paired_sensors):
 
 
 def MakePIPairs(csv_columns, already_paired_sensors):
-    print("\nMakePIPairs")
+    # print("\nMakePIPairs")
 
     pairs = {}
 
@@ -407,17 +411,20 @@ def MakePIPairs(csv_columns, already_paired_sensors):
 
 
 def BCLSPairs(csv_columns, already_paired_sensors):
-    print("\nBCLSPairs")
+    # print("\nBCLSPairs")
+    
 
     pairs = defaultdict(list) # dictionary that automatically creates list whenever new key is attempted
 
     for channel, time in channels:
         if time in csv_columns:
             for sensor_name in channel:
-
-                if sensor_name in csv_columns:
-                    if sensor_name not in already_paired_sensors:
-                        pairs[time].append(sensor_name)
+                # if sensor_name == "PT-FU-02":
+                #     pass
+                    
+                    if sensor_name in csv_columns:
+                        if sensor_name not in already_paired_sensors:
+                            pairs[time].append(sensor_name)
 
 
     # ########### compare with old version
@@ -479,11 +486,16 @@ def ConvertCSVToParquet(input_csv: str) -> str:
         f"Found {len(groups)} time column groups, {len(data_columns_to_plot)} total columns to process"
     )
 
+    data_columns_to_plot = set(data_columns_to_plot)
+    data_columns_to_plot.remove("Dev5_state")
+    data_columns_to_plot.remove("Dev6_state")
+    
+    
     # Read entire CSV at once with optimizations
     print("Reading CSV data...")
     df = pd.read_csv(
         input_csv,
-        usecols=list(data_columns_to_plot),
+        usecols=set(data_columns_to_plot),
         low_memory=False,
         on_bad_lines="warn",
         engine="c",
@@ -599,46 +611,49 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
     for sensor in SENSORS_TO_PLOT:
         column = sensor["column"]
-        if column not in df.columns:
-            print(f"Warning: Column '{sensor_name}' not found; skipping.")
+        # if column not in df.columns:
+        #     print(f"Warning: Column '{sensor_name}' not found; skipping.")
+
+        try:
+            y = pd.to_numeric(df[column], errors="coerce")
+            mask = y.notna()
+            if not mask.any():
+                continue
+
+            x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
+            y_axis_key = sensor.get("yaxis", "y1").lower()
+
+            if y_axis_key not in used_axes:
+                used_axes.append(y_axis_key)
 
 
-        y = pd.to_numeric(df[column], errors="coerce")
-        mask = y.notna()
-
-        if not mask.any():
-            continue
-
-        x_vals, y_vals = _thin(df.index[mask], y[mask], MAX_POINTS_PER_TRACE)
-        y_axis_key = sensor.get("yaxis", "y1").lower()
-
-        if y_axis_key not in used_axes:
-            used_axes.append(y_axis_key)
-
-
-        unit_name = re.search(r"(\[[^\]]+\]|\([^)]+\))\s*$", Y_AXIS_LABELS[y_axis_key]).group(1)
-    
-            
-        fig.add_trace(
-            go.Scatter(
-                x=x_vals,
-                y=y_vals,
-                mode="lines",
-                name=sensor.get("name", column),
-                line=dict(color=sensor.get("color")),
-                yaxis=y_axis_key,
-                visible=True,
-                hovertemplate=f"%{{y:.2f}} {unit_name}",
+            unit_name = re.search(r"(\[[^\]]+\]|\([^)]+\))\s*$", Y_AXIS_LABELS[y_axis_key]).group(1)
+        
+                
+            fig.add_trace(
+                go.Scatter(
+                    x=x_vals,
+                    y=y_vals,
+                    mode="lines",
+                    name=sensor.get("name", column),
+                    line=dict(color=sensor.get("color")),
+                    yaxis=y_axis_key,
+                    visible=True,
+                    hovertemplate=f"%{{y:.2f}} {unit_name}",
+                )
             )
-        )
-        traces_added += 1
-        print(f"  Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
+            traces_added += 1
+            print(f"✅ Added trace: {sensor.get('name', column)} ({len(y_vals)} points)")
+            
+        except KeyError:
+            print(f"🚫 {column} not found in data!")
+
 
 
     fig.update_layout(
         
-        title=f"{Path(parquet_path).name}",
-
+        title = f"{Path(parquet_path).with_suffix("").name}",
+        
         yaxis=dict(title="Pressure [psia]", visible=True),
 
         yaxis2=dict(title="Position Indicator [0/1]",
@@ -819,13 +834,13 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
                     ];
 
                     const handlers = [
-                        () => toggleGroup("-OX"),
-                        () => toggleGroup("-FU"),
-                        () => toggleGroup("-HE"),
-                        () => toggleGroup("PT-"),
-                        () => toggleGroup("TC-"),
-                        () => toggleGroup("RTD-"),
-                        () => toggleGroup("PI-"),
+                        () => toggleGroup("_OX"),
+                        () => toggleGroup("_FU"),
+                        () => toggleGroup("_HE"),
+                        () => toggleGroup("PT_"),
+                        () => toggleGroup("TC_"),
+                        () => toggleGroup("RTD_"),
+                        () => toggleGroup("PI_"),
                         () => toggleGroup("FMS"),
                         () => toggleGroup("ALL"),
                     ];
@@ -1184,7 +1199,7 @@ def PlotParquet(parquet_path: str, html_out: str, start: str | None, end: str | 
 
 def main():
 
-    DEFAULT_PATH = "data/test_data_truncated.csv"
+    DEFAULT_PATH = "utils/test_data_truncated.csv"
     _SENTINEL = object()
 
     ap = argparse.ArgumentParser()
@@ -1216,9 +1231,13 @@ def main():
     else:
         raise SystemExit("input must be .csv or .parquet")
 
-    html_out = os.path.join("output", f"{input_file_name}.html")
-    PlotParquet(parquet_path, html_out, args.start, args.end)
-    print(f"\n✓ Complete! Plot saved to: {html_out}")
+    if args.input_path != DEFAULT_PATH:
+        html_output_path = os.path.join("output", f"{input_file_name}.html")
+    else:
+        html_output_path = os.path.join("utils", f"{input_file_name}.html")
+        
+    PlotParquet(parquet_path, html_output_path, args.start, args.end)
+    print(f"\n✓ Complete! Plot saved to: {html_output_path}")
 
 
 if __name__ == "__main__":
