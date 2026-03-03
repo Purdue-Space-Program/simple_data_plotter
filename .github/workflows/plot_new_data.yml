@@ -111,7 +111,7 @@ jobs:
         
         echo "</ul>" >> index.html
         
-        echo "<p>old plotter: <a href="https://psp.rajanphadnis.com">psp.rajanphadnis.com</a></p> <ul>" >> index.html
+        echo "<p>old plotter: <a href="pspl.dataviewer.space">pspl.dataviewer.space</a></p> <ul>" >> index.html
         
         # ---- PDF viewer embed ----
         if [ -f PSPL_CMS_MASTER_11192025.pdf ]; then
