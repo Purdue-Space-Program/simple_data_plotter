@@ -1,0 +1,29 @@
+Data =  readmatrix('BZB Data_R-Spreadsheet.csv');
+
+time = Data(:,1);
+
+Altitude_GPS = Data(:,5);
+Altitude_ACC = Data(:,4);
+Figure_ALT_T = figure('Name','Altitude vs Time');
+Plot_Alt_T = plot(time(),Altitude_GPS(),time(),Altitude_ACC);
+title('Altitude vs Time');
+xlabel('Time (seconds)');
+ylabel('Altitude AGL');
+legend('Altitude AGL - GPS (ft)','Altitude AGL - ACC (ft)');
+grapherPSP(Figure_ALT_T,Plot_Alt_T,'Light');
+
+
+Acceleration = Data(:,2);
+
+%grapherPSP(3, "Acceleration vs Time", time(),Acceleration() , "Time (seconds)", "Acceleration (G's)");
+
+
+
+%Tilt = Data(:,12);
+%grapherPSP(4, "Tilt vs Time", time(),Tilt() , "Time (seconds)", "Tilt (degrees)");
+
+
+
+ 
+%Heading = Data(:,11);
+%grapherPSP(5, "Heading vs Time", time(),Heading() , "Time (seconds)", "Heading (degrees)");
